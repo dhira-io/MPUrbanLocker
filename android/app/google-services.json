@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "575994416898",
+    "project_id": "mpurbanlocker",
+    "storage_bucket": "mpurbanlocker.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:575994416898:android:0044cc0832e7d237d8fc1b",
+        "android_client_info": {
+          "package_name": "com.urbanlocker.mpurban"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCPyNXgYUfUEFmqExGoVpMm4O50nx74_6c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

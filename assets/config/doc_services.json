@@ -1,0 +1,271 @@
+[
+  {
+    "type": "Trade License",
+    "displayName": "Trade License",
+    "serviceType": "custom",
+    "imagePath": "assets/services/trade_license_certificate.png",
+    "bgcolor": "#33613AF5",
+    "fields": [
+      {
+        "key": "trade_license_id",
+        "label": "Trade License ID",
+        "hint": "Enter Trade License ID",
+        "type": "number",
+        "required": true
+      }
+    ]
+  },
+
+  {
+    "type": "Fire Noc",
+    "displayName": "Fire Noc",
+    "serviceType": "custom",
+    "imagePath": "assets/services/fire_extinguishing.png",
+    "bgcolor": "#33FF7700",
+    "fields": [
+      {
+        "key": "fire_noc_id",
+        "certificatetype": "type_of_certificate",
+        "certificatename": "Fire Plan Approval",
+        "label": "Fire Noc ID",
+        "hint": "Enter Fire Noc ID",
+        "type": "text",
+        "required": true
+      }
+    ]
+  },
+
+  {
+    "type": "fire safety certificate",
+    "displayName": "Fire Safety Certificate",
+    "serviceType": "custom",
+    "imagePath": "assets/services/firesafety_certificate.png",
+    "bgcolor": "#33EC2E2E",
+    "endpointType": "",
+    "fields": [
+      {
+        "key": "fire_noc_id",
+        "label": "Fire Safety ID",
+        "hint": "Enter Fire Safety ID",
+        "type": "text",
+        "required": true
+      }
+    ]
+  },
+
+  {
+    "type": "Property Certificate",
+    "displayName": "Property Noc",
+    "serviceType": "custom",
+    "imagePath": "assets/services/property_request_certificate.png",
+    "bgcolor": "#33BC1D1F",
+    "fields": [
+      {
+        "key": "certificate_id",
+        "certificatetype": "type_of_certificate",
+        "certificatename": "Property NOC",
+        "label": "Property Certificate ID",
+        "hint": "Enter Property Certificate ID",
+        "type": "text",
+        "required": true
+      }
+    ]
+  },
+
+  {
+    "type": "Water Certificate",
+    "displayName": "Water Certificate",
+    "serviceType": "custom",
+    "imagePath": "assets/services/water_new_connection.png",
+    "bgcolor": "#330042D0",
+    "fields": [
+      {
+        "key": "certificate_id",
+        "certificatetype": "type_of_certificate",
+        "certificatename": "Water Connection",
+        "label": "Water Certificate ID",
+        "hint": "Enter Water Certificate ID",
+        "type": "text",
+        "required": true
+      }
+    ]
+  },
+
+  {
+    "type": "Water Noc",
+    "displayName": "Water Noc",
+    "serviceType": "custom",
+    "imagePath": "assets/services/water_tax_receipt.png",
+    "bgcolor": "#33EC2E2E",
+    "fields": [
+      {
+        "key": "certificate_id",
+        "label": "Water Noc ID",
+        "hint": "Enter water Noc ID",
+        "type": "text",
+        "required": true
+      }
+    ]
+  },
+
+  {
+    "type": "Marriage Certificate",
+    "displayName": "Marriage Certificate",
+    "serviceType": "custom",
+    "imagePath": "assets/services/marriage_certificate.png",
+    "bgcolor": "#33613AF5",
+    "fields": [
+      {
+        "key": "application_id",
+        "label": "Marriage Certificate ID",
+        "hint": "Enter Marriage Certificate ID",
+        "type": "text",
+        "required": true
+      }
+    ]
+  },
+
+  {
+    "type": "New Property Application",
+    "displayName": "New Property Application",
+    "serviceType": "custom",
+    "imagePath": "assets/services/property_request_certificate.png",
+    "bgcolor": "#33BC1D1F",
+    "fields": [
+      {
+        "key": "certificate_id",
+        "label": "New property Application",
+        "hint": "Enter property Application",
+        "type": "text",
+        "required": true
+      }
+    ]
+  },
+
+  {
+    "type": "Sewerage Connection",
+    "displayName": "Sewerage Connection",
+    "serviceType": "custom",
+    "imagePath": "assets/services/sewerage_connection.png",
+    "bgcolor": "#330042D0",
+    "fields": [
+      {
+        "key": "sewerage_id",
+        "label": "Sewerage Connection",
+        "hint": "Enter Sewerage Connection",
+        "type": "text",
+        "required": true
+      }
+    ]
+  },
+
+  {
+    "type": "Tree Cutting/Transit Certificate",
+    "displayName": "Tree Cutting/Transit Certificate",
+    "serviceType": "custom",
+    "imagePath": "assets/services/tree_cutting.png",
+    "bgcolor": "#3305860E",
+    "fields": [
+      {
+        "key": "application_id",
+        "certificatetype": "type_of_certificate",
+        "certificatename": "Tree Cutting",
+        "label": "Tree Cutting/Transit Certificate ID",
+        "hint": "Enter Tree Cutting/Transit Certificate ID",
+        "type": "text",
+        "required": true
+      }
+    ]
+  },
+
+  {
+    "type": "Property Tax receipt",
+    "displayName": "Property Tax receipt",
+    "serviceType": "custom",
+    "imagePath": "assets/services/property_tax_receipt.png",
+    "bgcolor": "#33E66B00",
+    "fields": [
+      {
+        "key": "property_id",
+        "label": "Property ID",
+        "hint": "Enter Property ID",
+        "type": "text",
+        "required": true
+      },
+      {
+        "key": "assessment_year",
+        "label": "Assessment Year",
+        "hint": "Ex: 2025-26",
+        "type": "text",
+        "required": true
+      },
+      {
+        "key": "receipt_id",
+        "label": "Receipt Id",
+        "hint": "Enter Receipt Id",
+        "type": "text",
+        "required": true
+      },
+      {
+        "key": "receipt_date",
+        "label": "Receipt Date",
+        "hint": "Ex: YYYY-MM-DD",
+        "type": "text",
+        "required": true
+      }
+    ]
+  },
+  {
+    "type": "hoarding license",
+    "displayName": "Hoarding license",
+    "serviceType": "custom",
+    "imagePath": "assets/services/hoarding_license.png",
+    "bgcolor": "#33D9007B",
+    "endpointType": "",
+    "fields": [
+      {
+        "key": "license_id",
+        "label": "Hoarding license ID",
+        "hint": "Enter Hoarding license ID",
+        "type": "text",
+        "required": true
+      }
+    ]
+  },
+  {
+    "type": "property mutation",
+    "displayName": "Property Mutation",
+    "serviceType": "custom",
+    "imagePath": "assets/services/property_mutation_certificate.png",
+    "bgcolor": "#3305860E",
+    "endpointType": "",
+    "fields": [
+      {
+        "key": "property_id",
+        "label": "Property ID",
+        "hint": "Enter Property ID",
+        "type": "text",
+        "required": true
+      }
+    ]
+  },
+  {
+    "type": "water tax receipt",
+    "displayName": "Water Tax Receipt",
+    "serviceType": "custom",
+    "imagePath": "assets/services/water_tax_receipt.png",
+    "bgcolor": "#33EC2E2E",
+    "endpointType": "",
+    "fields": [
+      {
+        "key": "receipt_id",
+        "certificatetype": "receipt_type",
+        "certificatename": "New Connection",
+        "label": "Receipt ID",
+        "hint": "Enter Receipt ID",
+        "type": "text",
+        "required": true
+      }
+    ]
+  }
+]
