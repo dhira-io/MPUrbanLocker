@@ -22,8 +22,18 @@ class LocalNotificationService {
     );
 
     // Show notifications in foreground
-    await _plugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin
+    await _plugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
         >();
+  }
+
+  static Future<void> requestNotificationPermission() async {
+    final android = _plugin
+        .resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>();
+
+    await android?.requestNotificationsPermission();
   }
 
   static Future<void> showNotification({
