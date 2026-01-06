@@ -14,18 +14,19 @@ import 'providers/language_provider.dart';
 import 'screens/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   await ConfigService.loadConfig();
-  runApp(MyApp());
+
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => SplashProvider()),
@@ -41,11 +42,12 @@ class MyApp extends StatelessWidget {
           dispose: (_, service) => service.dispose(),
         ),
         ChangeNotifierProxyProvider<ApiService, AuthProvider>(
-          create: (context) => AuthProvider(apiService: context.read<ApiService>()),
+          create: (context) =>
+              AuthProvider(apiService: context.read<ApiService>()),
           update: (context, apiService, previous) =>
           previous ?? AuthProvider(apiService: apiService),
         ),
-             ],
+      ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         color: Color(0xff613AF5),

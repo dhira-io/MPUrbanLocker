@@ -119,6 +119,7 @@ class _MyDocumentsScreenState extends State<MyDocumentsScreen> {
                   fontWeight: FontWeight.w600,
                 ),
               ),
+/*
               GestureDetector(
                 onTap: () {
                   setState(() {
@@ -134,14 +135,15 @@ class _MyDocumentsScreenState extends State<MyDocumentsScreen> {
                   ),
                 ),
               ),
+*/
             ],
           ),
         ),
 
         // --- LIST OR GRID BASED ON toggle ---
-        showAllPopularDocs
-            ? _buildPopularDocsGrid(context)
-            : _buildDocumentsList(context),
+        //showAllPopularDocs ?
+             _buildPopularDocsGrid(context),
+           // : _buildDocumentsList(context),
         const SizedBox(height: 20),
 
         // Categories Section
@@ -159,18 +161,33 @@ class _MyDocumentsScreenState extends State<MyDocumentsScreen> {
   // --- Builds the search suggestions list ---
   Widget _buildSuggestionsList() {
     return Container(
-      color: Colors.white, // Give it a solid background
-      child: ListView.builder(
+      color: Colors.white,
+      child: ListView.separated(
         itemCount: _filteredServices.length,
+        separatorBuilder: (context, index) => Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: const Divider(
+            color: Color(0xffDDDDDD),
+            height: 1,
+            thickness: 1,
+          ),
+        ),
         itemBuilder: (context, index) {
           final service = _filteredServices[index];
+
           return ListTile(
-            title: Text(service.displayName),
+            leading: CircleAvatar(radius: 28, backgroundColor: service.bgcolor, child: Image.asset(service.imagePath)),
+            title: Text(
+              service.displayName,
+              style: GoogleFonts.inter(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
             onTap: () {
-              // When a suggestion is tapped, navigate and clear the search
               _navigateToDigiLockerAuth(context, service.displayName);
               _searchController.clear();
-              _searchFocusNode.unfocus(); // Hides keyboard and suggestions
+              _searchFocusNode.unfocus();
             },
           );
         },

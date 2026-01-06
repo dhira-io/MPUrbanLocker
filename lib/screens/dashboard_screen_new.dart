@@ -5,6 +5,7 @@ import 'package:digilocker_flutter/screens/myDocuments_screen.dart';
 import 'package:digilocker_flutter/screens/profile_screen.dart';
 import 'package:digilocker_flutter/utils/color_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
@@ -235,6 +236,7 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
                 ),
               ),
               SizedBox(width: 5),
+/*
               GestureDetector(
                 onTap: () {
                   setState(() {
@@ -250,14 +252,15 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
                   ),
                 ),
               ),
+*/
             ],
           ),
         ),
 
         // --- LIST OR GRID BASED ON toggle ---
-        showAllPopularDocs
-            ? _buildPopularDocsGrid(context)
-            : _buildDocumentsList(context),
+        // showAllPopularDocs ?
+             _buildPopularDocsGrid(context),
+            // : _buildDocumentsList(context),
         const SizedBox(height: 20),
 
         // 5. Issued Documents section
@@ -267,7 +270,7 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "Issued Documents",
+                "eNagar Palika documents",
                 style: GoogleFonts.inter(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
@@ -304,18 +307,33 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
   // --- Builds the search suggestions list ---
   Widget _buildSuggestionsList() {
     return Container(
-      color: Colors.white, // Give it a solid background
-      child: ListView.builder(
+      color: Colors.white,
+      child: ListView.separated(
         itemCount: _filteredServices.length,
+        separatorBuilder: (context, index) => Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: const Divider(
+            color: Color(0xffDDDDDD),
+            height: 1,
+            thickness: 1,
+          ),
+        ),
         itemBuilder: (context, index) {
           final service = _filteredServices[index];
+
           return ListTile(
-            title: Text(service.displayName),
+            leading: CircleAvatar(radius: 28, backgroundColor: service.bgcolor, child: Image.asset(service.imagePath)),
+            title: Text(
+              service.displayName,
+              style: GoogleFonts.inter(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
             onTap: () {
-              // When a suggestion is tapped, navigate and clear the search
               _navigateToDigiLockerAuth(context, service.displayName);
               _searchController.clear();
-              _searchFocusNode.unfocus(); // Hides keyboard and suggestions
+              _searchFocusNode.unfocus();
             },
           );
         },
@@ -330,6 +348,14 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
 
     return PopScope(
       canPop: false,
+      onPopInvoked: (didPop) async {
+        if (didPop) return;
+
+        final shouldExit = await _showExitDialog(context);
+        if (shouldExit) {
+          SystemNavigator.pop(); // closes the app
+        }
+      },
       child: Scaffold(
         appBar: _buildAppBar(),
         body: _pages[_selectedIndex],
@@ -358,6 +384,30 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
         endDrawer: _buildDrawer(context),
       ),
     );
+  }
+
+  Future<bool> _showExitDialog(BuildContext context) async {
+    return await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Exit App"),
+          content: const Text("Do you want to close this app?"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text("No"),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text("Yes"),
+            ),
+          ],
+        );
+      },
+    ) ??
+        false;
   }
 
   // ===================== DRAWER =====================
