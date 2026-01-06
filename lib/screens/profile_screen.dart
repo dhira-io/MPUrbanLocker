@@ -3,10 +3,13 @@ import 'dart:convert';
 import 'package:digilocker_flutter/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as _client;
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user.dart';
+import '../services/api_service.dart';
 import '../utils/color_utils.dart';
 import '../utils/constants.dart';
 import 'combine_dashboard.dart';
@@ -35,54 +38,52 @@ class _ProfileScreenState extends State<ProfileScreen> {
     getUserProfile();
   }
   getUserProfile() async {
-    final accessToken =
-        await FlutterSecureStorage().read(key: AppConstants.tokenKey) ?? "";
     final storedUserId =
         await FlutterSecureStorage().read(key: AppConstants.userIdKey) ?? "";
-    final response = await _client.get(
-      Uri.parse('${AppConstants.baseUrl}${AppConstants.userProfileEndpoint(storedUserId)}'),
-      headers: {
-        "Authorization": "Bearer $accessToken",
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-      },
-    );
-    print("user infoooooo ${response.body}");
-    final Map<String, dynamic> body =
-    jsonDecode(response.body) as Map<String, dynamic>;
+    final apiService = context.read<ApiService>();
+    try {
+      Map<String, dynamic> response = await apiService.getProfileInfo(
+          storedUserId);
 
-    if (body['success'] != true) {
-      debugPrint("❌ API returned success=false");
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${body['message']} ${body['error']}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      });
-      return;
-    }
+      if (response['success'] != true) {
+        debugPrint("❌ API returned success=false");
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('${response['message']} ${response['error']}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        });
+        return;
+      }
 
-    if (body['data'] == null) {
-      debugPrint("❌ Document missing in response");
-      return;
-    }
+      if (response['data'] == null) {
+        debugPrint("❌ Document missing in response");
+        return;
+      }
 
-    final User objUser = User.fromJson(
-      body['data']["user"] as Map<String, dynamic>,
-    );
-    if (mounted) {//userId,username,mobile,gender
-      setState(() {
-        _userId = objUser.id ?? 'N/A';
-        _name = objUser.name ?? '--';
-        _mobile = objUser.mobile ?? '+91 ******4321';
-        _gender = objUser.gender ?? 'N/A';
-        _userDOB = objUser.dob ?? '';
-        //_profileImageUrl =  prefs.getString('profileImage'); // may be null
-        _isLoggedIn = objUser.id != null ? true : false ;
-        _isLoading = false;
-      });
+      final User objUser = User.fromJson(
+        response['data']["user"] as Map<String, dynamic>,
+      );
+      if (mounted) { //userId,username,mobile,gender
+        setState(() {
+          _userId = objUser.id ?? 'N/A';
+          _name = objUser.name ?? '--';
+          _mobile = objUser.mobile ?? '+91 ******4321';
+          _gender = objUser.gender ?? 'N/A';
+          _userDOB = objUser.dob ?? '';
+          //_profileImageUrl =  prefs.getString('profileImage'); // may be null
+          _isLoggedIn = objUser.id != null ? true : false;
+          _isLoading = false;
+        });
+      }
+    } on NoInternetException catch (e) {
+      setState(() => _isLoading = false);
+      Fluttertoast.showToast(msg: "${e.toString()}");
+    } on Exception catch (e){
+      setState(() => _isLoading = false);
+      Fluttertoast.showToast(msg: "${e.toString()}");
     }
   }
 

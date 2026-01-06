@@ -136,6 +136,14 @@ class ApiService {
     return User.fromJson(response as Map<String, dynamic>);
   }
 
+  Future<Map<String, dynamic>> getProfileInfo(String userId) async {
+    Map<String, dynamic> response = await _getRequest(
+      "${AppConstants.userProfileEndpoint(userId)}",
+      includeAuth: true,
+    );
+    return response;
+  }
+
   // ==================== Demo Login ====================
 
   Future<Map<String, dynamic>> demoSendOtp(String phone) async {
@@ -225,6 +233,7 @@ class ApiService {
   }) async {
     return await _postRequest(endpoint, includeAuth: true, body: payload);
   }
+
 
   Future<Map<String, dynamic>> _postRequest(
     String endpoint, {
