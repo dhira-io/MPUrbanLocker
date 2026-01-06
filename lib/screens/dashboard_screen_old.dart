@@ -11,6 +11,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/auth_provider.dart';
 import '../providers/onboarding_provider.dart';
+import '../services/api_service.dart';
 import '../services/config_service.dart';
 import '../utils/color_utils.dart';
 
@@ -503,6 +504,13 @@ class _DashboardScreen_oldState extends State<DashboardScreen_old> {
       BuildContext context,
       String documentType,
       ) async {
+
+    bool internet_status = await CheckInternet.isInternetAvailable();
+    if (internet_status == false) {
+      CheckInternet.showNoInternetToast();
+      return;
+    }
+
     if (_isNavigating) return;
     setState(() => _isNavigating = true);
 

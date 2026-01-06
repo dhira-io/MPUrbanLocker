@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import '../models/api_response.dart';
 import '../models/document.dart';
@@ -299,4 +300,8 @@ class CheckInternet {
     }
     return true;
   }
+
+ static showNoInternetToast(){
+   Fluttertoast.showToast(msg: 'No internet connection');
+ }
 }
