@@ -23,39 +23,22 @@ class _SplashScreenState extends State<SplashScreen> {
     return Consumer<SplashProvider>(
       builder: (ctx, splash, child) {
         if (splash.isReady) {
-          final bool isNewUser = splash.isNewUser;
           final bool isLoggedIn = splash.isLoggedIn;
-
           // Navigation logic executes only after the frame is built
           WidgetsBinding.instance.addPostFrameCallback((_) {
-
-            // --- Navigation Flow Implementation ---
-            if (isNewUser) {
-              // 1. New User: Redirect to Language selection/Onboarding screen
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (_) => LanguageScreen()),
-              );
-
-            } else if (isLoggedIn) {
-              // 2. Existing and Logged In: Redirect to main authenticated view
+            if (isLoggedIn) {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
                   builder: (_) => CombinedDashboard(isLoggedIn: true),
                 ),
               );
-
             } else {
-              // 3. Existing but Logged Out: Redirect to non-authenticated view
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(
-                  builder: (_) => CombinedDashboard(isLoggedIn: false,)
-                ),
+                MaterialPageRoute(builder: (_) => LanguageScreen()),
               );
             }
-            // --- End Navigation Flow ---
           });
         }
 

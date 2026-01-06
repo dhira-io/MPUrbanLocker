@@ -3,13 +3,16 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../utils/constants.dart';
 
 class SplashProvider with ChangeNotifier {
   bool _isReady = false;
   bool _isLoggedIn = false;
-  bool _isNewUser = true;
+  bool _isNewUser = false;
 
   bool get isReady => _isReady;
   bool get isLoggedIn => _isLoggedIn;
@@ -60,10 +63,10 @@ class SplashProvider with ChangeNotifier {
 
   Future<void> startSplash() async {
     // 1. Splash delay
-    await Future.delayed(Duration(seconds: 10));
+    await Future.delayed(Duration(seconds: 5));
 
     // 2. Check statuses
-    await _checkNewUserStatus();
+
     await _checkLoginStatus(); // Check login status regardless of NewUser status
     await getAppStoreStatus();
     // 3. Mark as ready
@@ -71,27 +74,16 @@ class SplashProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> _checkNewUserStatus() async {
-    final prefs = await SharedPreferences.getInstance();
-    // Check if the 'hasRunBefore' flag exists. Assume new if missing.
-    final hasRunBefore = prefs.getBool('hasRunBefore') ?? false;
-    _isNewUser = !hasRunBefore;
-  }
-
   Future<void> _checkLoginStatus() async {
-    final prefs = await SharedPreferences.getInstance();
+    final token = await FlutterSecureStorage().read(key: AppConstants.tokenKey);
+    print("here is token ${token}");
     // Check for an 'authToken' to determine login state
-    final token = prefs.getString('authToken');
     _isLoggedIn = token != null && token.isNotEmpty;
+    print("here is token ${_isLoggedIn}");
+
   }
 
-  // CRITICAL: Call this after LanguageScreen completion
-  static Future<void> markUserAsExisting() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('hasRunBefore', true);
-  }
 
-  //firestore
 
 
 }

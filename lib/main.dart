@@ -5,6 +5,7 @@ import 'package:digilocker_flutter/providers/license_provider.dart';
 import 'package:digilocker_flutter/providers/login_provider.dart';
 import 'package:digilocker_flutter/providers/onboarding_provider.dart';
 import 'package:digilocker_flutter/providers/otp_provider.dart';
+import 'package:digilocker_flutter/services/LocalNotificationServices.dart';
 import 'package:digilocker_flutter/services/api_service.dart';
 import 'package:digilocker_flutter/services/config_service.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +18,7 @@ import 'package:firebase_core/firebase_core.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  await LocalNotificationService.init();
   await ConfigService.loadConfig();
 
   runApp(const MyApp());

@@ -11,6 +11,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../components/common_appbar.dart';
+import '../services/LocalNotificationServices.dart';
 import '../utils/constants.dart';
 
 class DocumentPreview extends StatefulWidget {
@@ -96,10 +97,14 @@ class _DocumentPreviewState extends State<DocumentPreview> {
   Future<void> _saveToDownloads(Uint8List bytes, String name) async {
     if (Platform.isAndroid) {
       final file =
-      File('/storage/emulated/0/Download/$name.pdf').writeAsBytes(bytes);
+     await File('/storage/emulated/0/Download/$name.pdf').writeAsBytes(bytes);
 
       if ((await file).path.isNotEmpty) {
         _showSnackBar('Document Successfully Downloaded', Colors.green);
+        // Show notification
+        await LocalNotificationService.showNotification(
+            title: 'Download Complete', body: '$name.pdf downloaded',
+            filePath: file.path);
       } else {
         _showSnackBar('Download failed', Colors.red);
       }
