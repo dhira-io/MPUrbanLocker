@@ -97,21 +97,24 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
     });
   }
 
-
   Future<void> getDocuments() async {
     List<Document> loadedDocs = [];
     try {
-      final accessToken =
-      await FlutterSecureStorage().read(key: AppConstants.tokenKey);
-      final userId =
-      await FlutterSecureStorage().read(key: AppConstants.userIdKey);
+      final accessToken = await FlutterSecureStorage().read(
+        key: AppConstants.tokenKey,
+      );
+      final userId = await FlutterSecureStorage().read(
+        key: AppConstants.userIdKey,
+      );
 
       // Only fetch documents if the user is logged in
       if (accessToken != null && userId != null && accessToken.isNotEmpty) {
         final uri = Uri.parse(
           '${AppConstants.baseUrl}${AppConstants.userDocumentsEndpoint(userId)}',
         );
-        print("$accessToken \n$userId  \n${AppConstants.baseUrl}${AppConstants.userDocumentsEndpoint(userId)}");
+        print(
+          "$accessToken \n$userId  \n${AppConstants.baseUrl}${AppConstants.userDocumentsEndpoint(userId)}",
+        );
         final response = await http.get(
           uri,
           headers: {
@@ -122,23 +125,21 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
 
         if (response.statusCode >= 200 && response.statusCode < 300) {
           final Map<String, dynamic> body =
-          jsonDecode(response.body) as Map<String, dynamic>;
+              jsonDecode(response.body) as Map<String, dynamic>;
 
           debugPrint("📄 Documents API response: $body");
 
           if (body['success'] == true) {
             final Map<String, dynamic> data =
-            body['data'] as Map<String, dynamic>;
+                body['data'] as Map<String, dynamic>;
 
-            final List<dynamic> documents =
-                (data['documents'] as List?) ?? [];
-            List<Document> arrdocuments  =documents
-                .map(
-                  (e) => Document.fromJson(e as Map<String, dynamic>),
-            ).toList();
+            final List<dynamic> documents = (data['documents'] as List?) ?? [];
+            List<Document> arrdocuments = documents
+                .map((e) => Document.fromJson(e as Map<String, dynamic>))
+                .toList();
             loadedDocs = {
               for (final doc in arrdocuments)
-                if (doc.doctype != null) doc.doctype!: doc
+                if (doc.doctype != null) doc.doctype!: doc,
             }.values.toList();
           } else {
             debugPrint("❌ API returned success=false");
@@ -160,7 +161,6 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
     }
   }
 
-
   // --- BOTTOM NAV NAVIGATION HANDLER ---
   void _onItemTapped(int index) {
     setState(() {
@@ -176,7 +176,8 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
       return const Center(child: CircularProgressIndicator());
     }
     // Determine if the suggestion list should be visible
-    final bool showSuggestions = _searchFocusNode.hasFocus && _searchController.text.isNotEmpty;
+    final bool showSuggestions =
+        _searchFocusNode.hasFocus && _searchController.text.isNotEmpty;
 
     return SafeArea(
       child: Column(
@@ -227,9 +228,13 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
             children: [
               Text(
                 'Documents you might need',
-                style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600,color: ColorUtils.fromHex("#1F2937")),
+                style: GoogleFonts.inter(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: ColorUtils.fromHex("#1F2937"),
+                ),
               ),
-              SizedBox(width: 5,),
+              SizedBox(width: 5),
               GestureDetector(
                 onTap: () {
                   setState(() {
@@ -255,7 +260,6 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
             : _buildDocumentsList(context),
         const SizedBox(height: 20),
 
-
         // 5. Issued Documents section
         Padding(
           padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16),
@@ -264,7 +268,11 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
             children: [
               Text(
                 "Issued Documents",
-                style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600, color: ColorUtils.fromHex("#1F2937")),
+                style: GoogleFonts.inter(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: ColorUtils.fromHex("#1F2937"),
+                ),
               ),
               const SizedBox(height: 10),
               if (issuedDocs.isEmpty) ...[
@@ -276,12 +284,15 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
                   child: Center(
                     child: Text(
                       'No documents issued yet.',
-                      style: GoogleFonts.inter(color: ColorUtils.fromHex("#4B5563"), fontSize: 14,),
+                      style: GoogleFonts.inter(
+                        color: ColorUtils.fromHex("#4B5563"),
+                        fontSize: 14,
+                      ),
                     ),
                   ),
                 ),
               ] else
-              // Show API-fetched documents
+                // Show API-fetched documents
                 ...issuedDocs.map((doc) => _buildIssuedDocTile(doc)).toList(),
             ],
           ),
@@ -312,39 +323,40 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
     );
   }
 
-
   // --- MAIN BUILD METHOD ---
   @override
   Widget build(BuildContext context) {
     _pages[0] = _buildHomePage();
 
-    return Scaffold(
-      appBar: _buildAppBar(),
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+        appBar: _buildAppBar(),
+        body: _pages[_selectedIndex],
+        // Displays the content of the selected tab
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: _selectedIndex,
+          onTap: _onItemTapped,
+          selectedItemColor: ColorUtils.fromHex("#613AF5"),
+          unselectedItemColor: ColorUtils.fromHex("#9CA3AF"),
+          type: BottomNavigationBarType.fixed,
+          // Use fixed for more than 3 items
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.description),
+              label: 'Docs& Services',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.notifications),
+              label: 'Notifications',
+            ),
+            BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+          ],
+        ),
 
-      body: _pages[_selectedIndex], // Displays the content of the selected tab
-
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        selectedItemColor: ColorUtils.fromHex("#613AF5"),
-        unselectedItemColor: ColorUtils.fromHex("#9CA3AF"),
-        type: BottomNavigationBarType.fixed,
-        // Use fixed for more than 3 items
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.description),
-            label: 'Docs& Services',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.notifications),
-            label: 'Notifications',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-        ],
+        endDrawer: _buildDrawer(context),
       ),
-
-      endDrawer: _buildDrawer(context),
     );
   }
 
@@ -357,43 +369,49 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
           padding: EdgeInsets.zero,
           children: [
             Padding(
-              padding: const EdgeInsets.only(top: 10.0,bottom: 20),
+              padding: const EdgeInsets.only(top: 10.0, bottom: 20),
               child: Row(
                 children: [
                   // Placeholder for the Government/MP Logo
                   SizedBox(
-                      width: 40,
-                      height: 40,
-                      child: Image.asset('assets/lion.png')),
+                    width: 40,
+                    height: 40,
+                    child: Image.asset('assets/lion.png'),
+                  ),
                   const SizedBox(width: 10),
                   SizedBox(
                     width: 40,
                     height: 40,
                     //color: Colors.blue[50],
-                    child: Image.asset('assets/logo.png', color: Color(0xff613AF5)),
+                    child: Image.asset(
+                      'assets/logo.png',
+                      color: Color(0xff613AF5),
+                    ),
                   ),
                   const SizedBox(width: 10),
                   Flexible(
-                    child:  Text(
-                        'MP Urban Locker',
-                        style: GoogleFonts.inter(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            color: ColorUtils.fromHex("#613AF5")
-                        )
+                    child: Text(
+                      'MP Urban Locker',
+                      style: GoogleFonts.inter(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: ColorUtils.fromHex("#613AF5"),
+                      ),
                     ),
-
                   ),
                 ],
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(top: 8.0,bottom: 8.0),
-              child: Text("Menu",style: GoogleFonts.inter(
+              padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+              child: Text(
+                "Menu",
+                style: GoogleFonts.inter(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: ColorUtils.fromHex("#9CA3AF")
-              ),),
+                  color: ColorUtils.fromHex("#9CA3AF"),
+                ),
+              ),
             ),
             Divider(color: Color(0xffDDDDDD)),
             ListTile(
@@ -437,39 +455,41 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
             Divider(color: Color(0xffDDDDDD)),
 
             Padding(
-              padding: const EdgeInsets.only(top: 8.0,bottom: 8.0),
-              child: Text("About MP Urban Locker",style:GoogleFonts.inter(
+              padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+              child: Text(
+                "About MP Urban Locker",
+                style: GoogleFonts.inter(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: ColorUtils.fromHex("#9CA3AF")
-              ),),
+                  color: ColorUtils.fromHex("#9CA3AF"),
+                ),
+              ),
             ),
             Divider(color: Color(0xffDDDDDD)),
 
             ListTile(
-                leading: Image.asset('assets/about.png'),
-                title: const Text('About MP Urban Locker'),
-                trailing: Icon(Icons.arrow_forward_ios),
-                onTap: () {
-
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => AboutMpUrbanLockerScreen()),
-                  );
-                }
+              leading: Image.asset('assets/about.png'),
+              title: const Text('About MP Urban Locker'),
+              trailing: Icon(Icons.arrow_forward_ios),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => AboutMpUrbanLockerScreen()),
+                );
+              },
             ),
             Divider(color: Color(0xffDDDDDD)),
 
             ListTile(
-                leading: Image.asset('assets/faq.png'),
-                title: const Text('FAQ'),
-                trailing: Icon(Icons.arrow_forward_ios),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => FaqScreen()),
-                  );
-                }
+              leading: Image.asset('assets/faq.png'),
+              title: const Text('FAQ'),
+              trailing: Icon(Icons.arrow_forward_ios),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => FaqScreen()),
+                );
+              },
             ),
             Divider(color: Color(0xffDDDDDD)),
             ListTile(
@@ -518,9 +538,16 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text("Version 1.0.0",style:GoogleFonts.inter(fontSize: 12,fontWeight: FontWeight.w400, color: Color(0xff9CA3AF)),
-                    ))
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    "Version 1.0.0",
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w400,
+                      color: Color(0xff9CA3AF),
+                    ),
+                  ),
+                ),
               ],
             ),
           ],
@@ -558,17 +585,20 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
       ),
       actions: [
         IconButton(
-          icon: Icon(Icons.qr_code_scanner, color: ColorUtils.fromHex("#212121")),
+          icon: Icon(
+            Icons.qr_code_scanner,
+            color: ColorUtils.fromHex("#212121"),
+          ),
           onPressed: () {},
         ),
         Builder(
-          builder: (context) =>
-              IconButton(
-                icon: Icon(Icons.menu, color: ColorUtils.fromHex("#212121")),
-                onPressed: () {
-                  Scaffold.of(context).openEndDrawer();
-                },
-              ),)
+          builder: (context) => IconButton(
+            icon: Icon(Icons.menu, color: ColorUtils.fromHex("#212121")),
+            onPressed: () {
+              Scaffold.of(context).openEndDrawer();
+            },
+          ),
+        ),
       ],
     );
   }
@@ -605,7 +635,11 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
                     hintText: 'Search for documents...',
                     border: InputBorder.none,
                     isDense: true,
-                    hintStyle: GoogleFonts.inter(fontSize: 16,fontWeight: FontWeight.w400, color: ColorUtils.fromHex("#2121217A")),
+                    hintStyle: GoogleFonts.inter(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w400,
+                      color: ColorUtils.fromHex("#2121217A"),
+                    ),
                   ),
                 ),
               ),
@@ -759,9 +793,9 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
                 title,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: ColorUtils.fromHex("#374151")
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: ColorUtils.fromHex("#374151"),
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -815,13 +849,31 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
         ),
         title: Text(
           doc.name ?? 'Unknown Document',
-          style: GoogleFonts.inter(fontSize: 16,fontWeight: FontWeight.w600, color: ColorUtils.fromHex("#1F2937")),
+          style: GoogleFonts.inter(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: ColorUtils.fromHex("#1F2937"),
+          ),
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(doc.issuer  ?? doc.type ?? 'Issued Document',style: GoogleFonts.inter(fontSize: 12,fontWeight: FontWeight.w400, color: ColorUtils.fromHex("#4B5563")),),
-            Text('Issued on: ${doc.date ?? 'N/A'}',style: GoogleFonts.inter(fontSize: 12,fontWeight: FontWeight.w400, color: ColorUtils.fromHex("#4B5563")),),
+            Text(
+              doc.issuer ?? doc.type ?? 'Issued Document',
+              style: GoogleFonts.inter(
+                fontSize: 12,
+                fontWeight: FontWeight.w400,
+                color: ColorUtils.fromHex("#4B5563"),
+              ),
+            ),
+            Text(
+              'Issued on: ${doc.date ?? 'N/A'}',
+              style: GoogleFonts.inter(
+                fontSize: 12,
+                fontWeight: FontWeight.w400,
+                color: ColorUtils.fromHex("#4B5563"),
+              ),
+            ),
           ],
         ),
         trailing: TextButton(
@@ -830,7 +882,12 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => DocumentPreview(title: doc.name ?? "", date: doc.date ?? "N/A",uri: doc.uri, pdfString: '',),
+                builder: (_) => DocumentPreview(
+                  title: doc.name ?? "",
+                  date: doc.date ?? "N/A",
+                  uri: doc.uri,
+                  pdfString: '',
+                ),
               ),
             );
           },
@@ -850,12 +907,12 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
     );
   }
 
-
   void _navigateToDigiLockerAuth(BuildContext context, String documentType) {
-
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => CreateDocumentForm(docType: documentType,)),
+      MaterialPageRoute(
+        builder: (_) => CreateDocumentForm(docType: documentType),
+      ),
     );
   }
 }
@@ -900,23 +957,23 @@ class CategoryCard extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircleAvatar(
-              radius: 28,
-              backgroundColor: bgColor,
-              child: image,
-            ),
+            CircleAvatar(radius: 28, backgroundColor: bgColor, child: image),
             const SizedBox(height: 8),
             SizedBox(
               height: 38,
               child: Text(
                 title,
                 textAlign: TextAlign.center,
-                style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500,color: ColorUtils.fromHex("#4B5563")),
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: ColorUtils.fromHex("#4B5563"),
+                ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            SizedBox(height: 5)
+            SizedBox(height: 5),
           ],
         ),
       ),
