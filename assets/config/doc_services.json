@@ -11,7 +11,8 @@
         "label": "Trade License ID",
         "hint": "Enter Trade License ID",
         "type": "number",
-        "required": true
+        "required": true,
+        "ui_control_type": "text_input"
       }
     ]
   },
@@ -30,7 +31,8 @@
         "label": "Fire Noc ID",
         "hint": "Enter Fire Noc ID",
         "type": "text",
-        "required": true
+        "required": true,
+        "ui_control_type": "text_input"
       }
     ]
   },
@@ -48,7 +50,8 @@
         "label": "Fire Safety ID",
         "hint": "Enter Fire Safety ID",
         "type": "text",
-        "required": true
+        "required": true,
+        "ui_control_type": "text_input"
       }
     ]
   },
@@ -67,7 +70,8 @@
         "label": "Property Certificate ID",
         "hint": "Enter Property Certificate ID",
         "type": "text",
-        "required": true
+        "required": true,
+        "ui_control_type": "text_input"
       }
     ]
   },
@@ -86,7 +90,8 @@
         "label": "Water Certificate ID",
         "hint": "Enter Water Certificate ID",
         "type": "text",
-        "required": true
+        "required": true,
+        "ui_control_type": "text_input"
       }
     ]
   },
@@ -103,7 +108,8 @@
         "label": "Water Noc ID",
         "hint": "Enter water Noc ID",
         "type": "text",
-        "required": true
+        "required": true,
+        "ui_control_type": "text_input"
       }
     ]
   },
@@ -120,7 +126,8 @@
         "label": "Marriage Certificate ID",
         "hint": "Enter Marriage Certificate ID",
         "type": "text",
-        "required": true
+        "required": true,
+        "ui_control_type": "text_input"
       }
     ]
   },
@@ -137,7 +144,8 @@
         "label": "New property Application",
         "hint": "Enter property Application",
         "type": "text",
-        "required": true
+        "required": true,
+        "ui_control_type": "text_input"
       }
     ]
   },
@@ -154,7 +162,8 @@
         "label": "Sewerage Connection",
         "hint": "Enter Sewerage Connection",
         "type": "text",
-        "required": true
+        "required": true,
+        "ui_control_type": "text_input"
       }
     ]
   },
@@ -173,7 +182,8 @@
         "label": "Tree Cutting/Transit Certificate ID",
         "hint": "Enter Tree Cutting/Transit Certificate ID",
         "type": "text",
-        "required": true
+        "required": true,
+        "ui_control_type": "text_input"
       }
     ]
   },
@@ -190,28 +200,32 @@
         "label": "Property ID",
         "hint": "Enter Property ID",
         "type": "text",
-        "required": true
+        "required": true,
+        "ui_control_type": "text_input"
       },
       {
         "key": "assessment_year",
         "label": "Assessment Year",
         "hint": "Ex: 2025-26",
         "type": "text",
-        "required": true
+        "required": true,
+        "ui_control_type": "year_picker"
       },
       {
         "key": "receipt_id",
         "label": "Receipt Id",
         "hint": "Enter Receipt Id",
         "type": "text",
-        "required": true
+        "required": true,
+        "ui_control_type": "text_input"
       },
       {
         "key": "receipt_date",
         "label": "Receipt Date",
         "hint": "Ex: YYYY-MM-DD",
         "type": "text",
-        "required": true
+        "required": true,
+        "ui_control_type": "date_picker"
       }
     ]
   },
@@ -228,7 +242,8 @@
         "label": "Hoarding license ID",
         "hint": "Enter Hoarding license ID",
         "type": "text",
-        "required": true
+        "required": true,
+        "ui_control_type": "text_input"
       }
     ]
   },
@@ -245,7 +260,8 @@
         "label": "Property ID",
         "hint": "Enter Property ID",
         "type": "text",
-        "required": true
+        "required": true,
+        "ui_control_type": "text_input"
       }
     ]
   },
@@ -264,7 +280,8 @@
         "label": "Receipt ID",
         "hint": "Enter Receipt ID",
         "type": "text",
-        "required": true
+        "required": true,
+        "ui_control_type": "text_input"
       }
     ]
   }

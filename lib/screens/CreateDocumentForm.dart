@@ -25,6 +25,10 @@ class _CreateDocumentFormState extends State<CreateDocumentForm> {
 
   DocServiceConfig? serviceConfig;
   final Map<String, TextEditingController> controllers = {};
+  final Map<String, TextEditingController> fromYearControllers = {};
+  final Map<String, TextEditingController> toYearControllers = {};
+  final Map<String, String?> yearErrors = {};
+
 
   @override
   void initState() {
@@ -192,7 +196,212 @@ class _CreateDocumentFormState extends State<CreateDocumentForm> {
       endDrawer: customEndDrawer(context),
     );
   }
+  void _validateAndUpdateAssessmentYear(String key) {
+    final fromText = fromYearControllers[key]?.text;
+    final toText = toYearControllers[key]?.text;
 
+    setState(() {
+      yearErrors[key] = null;
+
+      if (fromText == null || fromText.isEmpty) {
+        yearErrors[key] = "From Year is required";
+        controllers[key]?.clear();
+        return;
+      }
+
+      if (toText == null || toText.isEmpty) {
+        yearErrors[key] = "To Year is required";
+        controllers[key]?.clear();
+        return;
+      }
+
+      final fromYear = int.parse(fromText);
+      final toYear = int.parse(toText);
+
+      if (toYear <= fromYear) {
+        yearErrors[key] = "To Year must be greater than From Year";
+        controllers[key]?.clear();
+        return;
+      }
+
+      // if (toYear != fromYear + 1) {
+      //   yearErrors[key] =
+      //   "Assessment year must be consecutive (e.g. 2025-26)";
+      //   controllers[key]?.clear();
+      //   return;
+      // }
+
+      // ✅ VALID → SAVE FORMAT
+      final toShort = toYear.toString().substring(2);
+      controllers[key]!.text = "$fromYear-$toShort";
+    });
+  }
+
+
+  Widget _yearBox({
+    required String label,
+    required TextEditingController controller,
+    required String fieldKey,
+  }) {
+    return TextFormField(
+      controller: controller,
+      readOnly: true,
+      decoration: InputDecoration(
+        labelText: label,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+      ),
+      onTap: () async {
+        FocusScope.of(context).unfocus();
+
+        final currentYear = DateTime.now().year;
+
+        final selectedYear = await showDialog<int>(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text("Select Year"),
+              content: SizedBox(
+                width: double.maxFinite,
+                height: 300, // 👈 REQUIRED
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: 50,
+                  itemBuilder: (_, index) {
+                    final year = DateTime.now().year - index;
+                    return ListTile(
+                      title: Text(year.toString()),
+                      onTap: () => Navigator.pop(context, year),
+                    );
+                  },
+                ),
+              ),
+            );
+          },
+        );
+
+
+        if (selectedYear != null) {
+          controller.text = selectedYear.toString();
+          _validateAndUpdateAssessmentYear(fieldKey);
+        }
+      },
+    );
+  }
+
+  Widget _buildYearPicker(FieldConfig field) {
+    fromYearControllers.putIfAbsent(
+        field.key, () => TextEditingController());
+    toYearControllers.putIfAbsent(
+        field.key, () => TextEditingController());
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: _yearBox(
+                label: "From Year",
+                controller: fromYearControllers[field.key]!,
+                fieldKey: field.key,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _yearBox(
+                label: "To Year",
+                controller: toYearControllers[field.key]!,
+                fieldKey: field.key,
+              ),
+            ),
+          ],
+        ),
+
+        if (yearErrors[field.key] != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              yearErrors[field.key]!,
+              style: const TextStyle(color: Colors.red, fontSize: 12),
+            ),
+          ),
+      ],
+    );
+  }
+
+
+
+  Widget _buildDatePicker(FieldConfig field) {
+    return TextFormField(
+      controller: controllers[field.key],
+      readOnly: true,
+      decoration: _inputDecoration(field),
+      onTap: () async {
+        FocusScope.of(context).unfocus();
+
+        final pickedDate = await showDatePicker(
+          context: context,
+          initialDate: DateTime.now(),
+          firstDate: DateTime(1900),
+          lastDate: DateTime(2100),
+        );
+
+        if (pickedDate != null) {
+          controllers[field.key]!.text =
+          "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
+        }
+      },
+      validator: (val) {
+        if (field.required && (val == null || val.isEmpty)) {
+          return "Required";
+        }
+        return null;
+      },
+    );
+  }
+  InputDecoration _inputDecoration(FieldConfig field) {
+    return InputDecoration(
+      floatingLabelBehavior: FloatingLabelBehavior.never,
+      labelText: field.label,
+      hintText: field.hint,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+    );
+  }
+
+  Widget _buildTextInput(FieldConfig field) {
+    return TextFormField(
+      controller: controllers[field.key],
+      decoration: _inputDecoration(field),
+      keyboardType:
+      field.type == "number" ? TextInputType.number : TextInputType.text,
+      maxLength: field.maxLength,
+      validator: (val) {
+        if (field.required && (val == null || val.isEmpty)) {
+          return "Required";
+        }
+        return null;
+      },
+    );
+  }
+
+
+  Widget _buildFieldByType(FieldConfig field) {
+    switch (field.uiControlType) {
+      case "date_picker":
+        return _buildDatePicker(field);
+
+      case "year_picker":
+        return _buildYearPicker(field);
+
+      case "text_input":
+      default:
+        return _buildTextInput(field);
+    }
+  }
   /// Build dynamic input fields from config
   Widget buildFormFields() {
     if (serviceConfig == null) return const SizedBox.shrink();
@@ -208,53 +417,31 @@ class _CreateDocumentFormState extends State<CreateDocumentForm> {
                 text: TextSpan(
                   children: [
                     TextSpan(
-                      text: "${field.label}",
+                      text: field.label,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
                         color: Colors.black,
                       ),
                     ),
-                    TextSpan(
-                      text: " *",
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.red,
+                    if (field.required)
+                      const TextSpan(
+                        text: " *",
+                        style: TextStyle(color: Colors.red),
                       ),
-                    ),
                   ],
                 ),
               ),
-
               const SizedBox(height: 16),
-              TextFormField(
-                controller: controllers[field.key],
-                decoration: InputDecoration(
-                  floatingLabelBehavior: FloatingLabelBehavior.never,
-                  labelText: field.label,
-                  hintText: field.hint,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                keyboardType: field.type == "number"
-                    ? TextInputType.number
-                    : TextInputType.text,
-                maxLength: field.maxLength,
-                validator: (val) {
-                  if (field.required && (val == null || val.isEmpty)) {
-                    return "Required";
-                  }
-                  return null;
-                },
-              ),
+
+              _buildFieldByType(field),
             ],
           ),
         );
       }).toList(),
     );
   }
+
 
   /// Builds the JSON body for DigiLocker style API
   /*

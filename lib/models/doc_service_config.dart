@@ -54,6 +54,7 @@ class FieldConfig {
   final String type;
   final bool required;
   final int? maxLength;
+  final String uiControlType;
 
   FieldConfig({
     required this.key,
@@ -63,6 +64,7 @@ class FieldConfig {
     required this.hint,
     required this.type,
     required this.required,
+    required this.uiControlType,
     this.maxLength,
   });
 
@@ -76,6 +78,7 @@ class FieldConfig {
       type: json['type'],
       required: json['required'],
       maxLength: json['maxLength'],
+      uiControlType: json["ui_control_type"]
     );
   }
 }
