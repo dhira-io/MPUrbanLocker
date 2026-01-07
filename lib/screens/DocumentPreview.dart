@@ -109,11 +109,19 @@ class _DocumentPreviewState extends State<DocumentPreview> {
         _showSnackBar('Download failed', Colors.red);
       }
     } else if (Platform.isIOS) {
-      final dir = await getTemporaryDirectory();
+      final dir = await getApplicationDocumentsDirectory();
       final file = File('${dir.path}/$name.pdf');
-      await file.writeAsBytes(bytes);
-
-      await Share.shareXFiles([XFile(file.path)]);
+      await file.writeAsBytes(bytes ,flush: true);
+      if ((await file).path.isNotEmpty) {
+        _showSnackBar('Document Successfully Downloaded', Colors.green);
+        // Show notification
+        await LocalNotificationService.showNotification(
+            title: 'Download Complete', body: '$name.pdf downloaded',
+            filePath: file.path);
+      } else {
+        _showSnackBar('Download failed', Colors.red);
+      }
+      // await Share.shareXFiles([XFile(file.path)]);
     }
   }
 
