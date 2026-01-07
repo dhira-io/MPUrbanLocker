@@ -1,6 +1,6 @@
 class AppConstants {
   // API Configuration
-  static const String baseUrl =  'https://0w5c7rsr-3001.inc1.devtunnels.ms';//
+  static const String baseUrl =  'https://bktc4594-3001.inc1.devtunnels.ms';//'https://0w5c7rsr-3001.inc1.devtunnels.ms';//
   //'https://dev.uatenagarpalika.in:5443'; //'https://mpurbanlocker.in'; // ;
     // 'https://fqstnlh6-3001.inc1.devtunnels.ms'; // Android emulator localhost
 
@@ -32,13 +32,9 @@ class AppConstants {
 
 
   // User endpoints
-  static String userProfileEndpoint(String userId) =>
-      '/api/users/$userId/profile';
-  static String userDocumentsEndpoint(String userId) =>
-      '/api/users/$userId/documents';
-  static String documentFileEndpoint(String userId, String docId) =>
-      '/api/users/$userId/documents/$docId/file';
-
+  static const String userProfileEndpoint = '/api/users/me/profile';
+  static const String userDocumentsEndpoint = '/api/users/me/documents';
+  static String documentFileEndpoint(String docId) => '/api/users/me/documents/$docId/file';
 
 
 

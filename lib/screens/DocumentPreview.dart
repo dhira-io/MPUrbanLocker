@@ -16,14 +16,14 @@ import '../utils/constants.dart';
 
 class DocumentPreview extends StatefulWidget {
   final String title;
-  final String? uri;
+  final String? docId;
   final String date;
   final String pdfString;
 
   const DocumentPreview({
     super.key,
     required this.title,
-    this.uri,
+    this.docId,
     required this.date,
     required this.pdfString,
   });
@@ -52,30 +52,35 @@ class _DocumentPreviewState extends State<DocumentPreview> {
         await _storage.read(key: AppConstants.tokenKey) ?? '';
     final userId =
         await _storage.read(key: AppConstants.userIdKey) ?? '';
+print("${AppConstants.baseUrl}${AppConstants.documentFileEndpoint(widget.docId ?? "")}");
+   try {
+     final response = await http.get(
+       Uri.parse(
+         '${AppConstants.baseUrl}${AppConstants.documentFileEndpoint(
+             widget.docId ?? "")}',
+       ),
+       headers: {
+         'Authorization': 'Bearer $accessToken',
+         'Accept': 'application/json',
+       },
+     );
+     print(response.body);
+     if (response.statusCode >= 200 && response.statusCode < 300) {
+       final dir = await getTemporaryDirectory();
+       final file = File(
+         '${dir.path}/${widget.title.replaceAll(' ', '_')}.pdf',
+       );
 
-    final response = await http.get(
-      Uri.parse(
-        '${AppConstants.baseUrl}${AppConstants.documentFileEndpoint(userId, widget.uri ?? "")}',
-      ),
-      headers: {
-        'Authorization': 'Bearer $accessToken',
-        'Accept': 'application/json',
-      },
-    );
+       await file.writeAsBytes(response.bodyBytes);
 
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      final dir = await getTemporaryDirectory();
-      final file = File(
-        '${dir.path}/${widget.title.replaceAll(' ', '_')}.pdf',
-      );
-
-      await file.writeAsBytes(response.bodyBytes);
-
-      setState(() {
-        localPdfPath = file.path;
-        bytesOfDoc = response.bodyBytes;
-      });
-    }
+       setState(() {
+         localPdfPath = file.path;
+         bytesOfDoc = response.bodyBytes;
+       });
+     }
+   }catch (e) {
+     print(e.toString());
+   }
   }
 
   /// 🔐 Convert Base64 to PDF

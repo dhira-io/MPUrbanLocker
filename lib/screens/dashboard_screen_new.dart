@@ -111,10 +111,10 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
       // Only fetch documents if the user is logged in
       if (accessToken != null && userId != null && accessToken.isNotEmpty) {
         final uri = Uri.parse(
-          '${AppConstants.baseUrl}${AppConstants.userDocumentsEndpoint(userId)}',
+          '${AppConstants.baseUrl}${AppConstants.userDocumentsEndpoint}',
         );
         print(
-          "$accessToken \n$userId  \n${AppConstants.baseUrl}${AppConstants.userDocumentsEndpoint(userId)}",
+          "$accessToken \n$userId  \n${AppConstants.baseUrl}${AppConstants.userDocumentsEndpoint}",
         );
         final response = await http.get(
           uri,
@@ -935,7 +935,7 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
                 builder: (_) => DocumentPreview(
                   title: doc.name ?? "",
                   date: doc.date ?? "N/A",
-                  uri: doc.uri,
+                  docId: doc.id,
                   pdfString: '',
                 ),
               ),

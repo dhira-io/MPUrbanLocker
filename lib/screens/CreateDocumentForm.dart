@@ -370,7 +370,7 @@ class _CreateDocumentFormState extends State<CreateDocumentForm> {
             builder: (_) => DocumentPreview(
               title: widget.docType,
               date: "",
-              uri: "",
+              docId: "",
               pdfString: base64Pdf,
             ),
           ),

@@ -56,7 +56,6 @@ class ApiService {
 
   Future<Map<String, dynamic>> _handleResponse(http.Response response) async {
     final body = jsonDecode(response.body) as Map<String, dynamic>;
-
     print(body);
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return body;
@@ -130,7 +129,7 @@ class ApiService {
 
   Future<User> getUserProfile(String userId) async {
     Map<String, dynamic> response = await _getRequest(
-      "${AppConstants.userProfileEndpoint(userId)}",
+      "${AppConstants.userProfileEndpoint}",
       includeAuth: true,
     );
     return User.fromJson(response as Map<String, dynamic>);
@@ -138,7 +137,7 @@ class ApiService {
 
   Future<Map<String, dynamic>> getProfileInfo(String userId) async {
     Map<String, dynamic> response = await _getRequest(
-      "${AppConstants.userProfileEndpoint(userId)}",
+      "${AppConstants.userProfileEndpoint}",
       includeAuth: true,
     );
     return response;
@@ -242,7 +241,8 @@ class ApiService {
   }) async {
     try {
       await _checkInternet();
-
+      print("${baseUrl}${endpoint}");
+      print("${body}");
       final response = await _client
           .post(
             Uri.parse('$baseUrl$endpoint'),
@@ -250,12 +250,13 @@ class ApiService {
             body: jsonEncode(body ?? {}),
           )
           .timeout(const Duration(seconds: 30));
-
+print("${response.body}");
       return await _handleResponse(response);
     } on NoInternetException {
       rethrow;
     } on Exception catch (e) {
-      throw ApiException(e.toString());
+      print("${e.toString()}");
+    throw ApiException(e.toString());
     }
   }
 
@@ -266,7 +267,7 @@ class ApiService {
   }) async {
     try {
       await _checkInternet();
-
+      print("${baseUrl}${endpoint}");
       final uri = Uri.parse(
         '$baseUrl$endpoint',
       ).replace(queryParameters: queryParams);
@@ -303,7 +304,6 @@ class NoInternetException implements Exception {
 class CheckInternet {
   static Future<bool> isInternetAvailable() async {
     final result = await Connectivity().checkConnectivity();
-    print("internet status ${result}");
     if (result[0] == ConnectivityResult.none) {
       return false;
     }
