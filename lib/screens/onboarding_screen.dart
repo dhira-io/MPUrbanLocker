@@ -39,12 +39,12 @@ class OnboardingScreen extends StatelessWidget {
         automaticallyImplyLeading: false,
         title: Row(
           children: [
-            SizedBox(width: 30, height: 40, child: Image.asset("assets/lion.png")),
+            SizedBox(width: 23.64, height: 40, child: Image.asset("assets/lion.png")),
             const SizedBox(width: 10),
             Image.asset(
               'assets/logo.png',
-              height: 30,
-              width: 30,
+              height: 33,
+              width: 40,
               fit: BoxFit.contain,
             ),
             const SizedBox(width: 10),

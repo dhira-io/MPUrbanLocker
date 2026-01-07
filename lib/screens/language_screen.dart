@@ -31,11 +31,11 @@ class LanguageScreen extends StatelessWidget {
         automaticallyImplyLeading: false,
         title: Row(
           children: [
-            SizedBox(width: 30, height: 30, child: Image.asset(lionImage)),
+            SizedBox(width: 23.64, height: 40, child: Image.asset(lionImage)),
             const SizedBox(width: 10),
             SizedBox(
-              width: 30,
-              height: 30,
+              width: 33,
+              height: 40,
               child: Image.asset(logoImage, color: const Color(0xff613AF5)),
             ),
             const SizedBox(width: 10),

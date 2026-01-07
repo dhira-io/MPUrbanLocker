@@ -424,17 +424,17 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
                 children: [
                   // Placeholder for the Government/MP Logo
                   SizedBox(
-                    width: 40,
+                    width: 23.64,
                     height: 40,
-                    child: Image.asset('assets/lion.png'),
+                    child: Image.asset(lionImage),
                   ),
                   const SizedBox(width: 10),
                   SizedBox(
-                    width: 40,
+                    width: 33,
                     height: 40,
                     //color: Colors.blue[50],
                     child: Image.asset(
-                      'assets/logo.png',
+                      logoImage,
                       color: Color(0xff613AF5),
                     ),
                   ),
@@ -613,11 +613,11 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
       title: Row(
         children: [
           // Placeholder for the Government/MP Logo
-          SizedBox(width: 30, height: 30, child: Image.asset(lionImage)),
+          SizedBox(width: 23.64, height: 40, child: Image.asset(lionImage)),
           const SizedBox(width: 10),
           SizedBox(
-            width: 30,
-            height: 30,
+            width: 33,
+            height: 40,
             child: Image.asset(logoImage, color: ColorUtils.fromHex("#613AF5")),
           ),
           const SizedBox(width: 10),
@@ -747,7 +747,7 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
                 clipBehavior: Clip.hardEdge,
                 child: Image.asset(
                   slide["image"]!,
-                  fit: BoxFit.cover,
+                  fit: BoxFit.fitHeight,
                   width: double.infinity,
                   height: double.infinity,
                 ),

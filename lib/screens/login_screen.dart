@@ -27,11 +27,11 @@ class LoginScreen extends StatelessWidget {
                 Navigator.pop(context);
               },
             ),
-            SizedBox(width: 30, height: 30, child: Image.asset("assets/lion.png")),
+            SizedBox(width: 23.64, height: 40, child: Image.asset("assets/lion.png")),
             const SizedBox(width: 10),
             SizedBox(
-              width: 30,
-              height: 30,
+              width: 33,
+              height: 40,
               child: Image.asset("assets/logo.png", color: const Color(0xff613AF5)),
             ),
             const SizedBox(width: 10),

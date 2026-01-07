@@ -54,137 +54,139 @@ class _CreateDocumentFormState extends State<CreateDocumentForm> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-                  onPressed: () => Navigator.pop(context),
-                ),
-                Flexible(
-                  child: Text(
-                    widget.docType,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                  Flexible(
+                    child: Text(
+                      widget.docType,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
+                ],
+              ),
+              const SizedBox(height: 12),
 
-            Expanded(
-              child: Form(
-                key: _formKey,
-                child: ListView(
-                  children: [
-                    Card(
-                      elevation: 4,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      margin: const EdgeInsets.symmetric(vertical: 8),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // RichText(
-                            //   text: TextSpan(
-                            //     children: [
-                            //       TextSpan(
-                            //         text: "${widget.docType} Number",
-                            //         style: const TextStyle(
-                            //           fontSize: 16,
-                            //           fontWeight: FontWeight.w500,
-                            //           color: Colors.black,
-                            //         ),
-                            //       ),
-                            //       TextSpan(
-                            //         text: " *",
-                            //         style: const TextStyle(
-                            //           fontSize: 16,
-                            //           fontWeight: FontWeight.w400,
-                            //           color: Colors.red,
-                            //         ),
-                            //       ),
-                            //     ],
-                            //   ),
-                            // ),
-                            //
-                            // const SizedBox(height: 16),
-                            // Dynamic fields from JSON
-                            buildFormFields(),
-                          ],
+              Expanded(
+                child: Form(
+                  key: _formKey,
+                  child: ListView(
+                    children: [
+                      Card(
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        margin: const EdgeInsets.symmetric(vertical: 8),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // RichText(
+                              //   text: TextSpan(
+                              //     children: [
+                              //       TextSpan(
+                              //         text: "${widget.docType} Number",
+                              //         style: const TextStyle(
+                              //           fontSize: 16,
+                              //           fontWeight: FontWeight.w500,
+                              //           color: Colors.black,
+                              //         ),
+                              //       ),
+                              //       TextSpan(
+                              //         text: " *",
+                              //         style: const TextStyle(
+                              //           fontSize: 16,
+                              //           fontWeight: FontWeight.w400,
+                              //           color: Colors.red,
+                              //         ),
+                              //       ),
+                              //     ],
+                              //   ),
+                              // ),
+                              //
+                              // const SizedBox(height: 16),
+                              // Dynamic fields from JSON
+                              buildFormFields(),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                    SizedBox(height: 16),
-                    Card(
-                      elevation: 4,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      margin: const EdgeInsets.symmetric(vertical: 8),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Checkbox(
-                              value: consentGiven,
-                              onChanged: (val) =>
-                                  setState(() => consentGiven = val ?? false),
-                            ),
-                            SizedBox(width: 5),
-                            Expanded(
-                              child: Text(
-                                "I hereby give consent to fetch my ${widget.docType} details from concerned authority, Madhya Pradesh and store it securely in my MP Urban Locker for future use.",
-                                textAlign: TextAlign.justify,
+                      SizedBox(height: 16),
+                      Card(
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        margin: const EdgeInsets.symmetric(vertical: 8),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Checkbox(
+                                value: consentGiven,
+                                onChanged: (val) =>
+                                    setState(() => consentGiven = val ?? false),
                               ),
-                            ),
-                            SizedBox(width: 8),
-                            Image.asset('assets/speaker.png'),
-                          ],
+                              SizedBox(width: 5),
+                              Expanded(
+                                child: Text(
+                                  "I hereby give consent to fetch my ${widget.docType} details from concerned authority, Madhya Pradesh and store it securely in my MP Urban Locker for future use.",
+                                  textAlign: TextAlign.justify,
+                                ),
+                              ),
+                              SizedBox(width: 8),
+                              Image.asset('assets/speaker.png'),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
 
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: (consentGiven && !isLoading) ? _handleSubmit : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepPurple,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: (consentGiven && !isLoading) ? _handleSubmit : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepPurple,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
-                ),
-                child: isLoading
-                    ? const SizedBox(
-                  height: 22,
-                  width: 22,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.5,
-                    color: Colors.white,
+                  child: isLoading
+                      ? const SizedBox(
+                    height: 22,
+                    width: 22,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      color: Colors.white,
+                    ),
+                  )
+                      : const Text(
+                    "View Document",
+                    style: TextStyle(fontSize: 16, color: Colors.white),
                   ),
-                )
-                    : const Text(
-                  "View Document",
-                  style: TextStyle(fontSize: 16, color: Colors.white),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       endDrawer: customEndDrawer(context),

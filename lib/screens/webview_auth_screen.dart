@@ -165,17 +165,19 @@ class _WebViewAuthScreenState extends State<WebViewAuthScreen> {
             ),
         ],
       ),
-      body: _error != null
-          ? _buildErrorView()
-          : Stack(
-              children: [
-                WebViewWidget(controller: _controller),
-                if (_isLoading)
-                  const Center(
-                    child: CircularProgressIndicator(),
-                  ),
-              ],
-            ),
+      body: SafeArea(
+        child: _error != null
+            ? _buildErrorView()
+            : Stack(
+                children: [
+                  WebViewWidget(controller: _controller),
+                  if (_isLoading)
+                    const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                ],
+              ),
+      ),
     );
   }
 

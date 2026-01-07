@@ -23,11 +23,11 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       backgroundColor: Colors.white,
       title: Row(
         children: [
-          SizedBox(width: 30, height: 30, child: Image.asset("assets/lion.png")),
+          SizedBox(width: 23.64, height: 40, child: Image.asset("assets/lion.png")),
           const SizedBox(width: 10),
           SizedBox(
-            width: 30,
-            height: 30,
+            width: 33,
+            height: 40,
             child: Image.asset("assets/logo.png", color: ColorUtils.fromHex("#613AF5")),
           ),
           const SizedBox(width: 10),
@@ -72,12 +72,12 @@ Widget customEndDrawer(BuildContext context) {
               children: [
                 // Placeholder for the Government/MP Logo
                 SizedBox(
-                    width: 40,
+                    width: 23.64,
                     height: 40,
                     child: Image.asset('assets/lion.png')),
                 const SizedBox(width: 6),
                 SizedBox(
-                  width: 40,
+                  width: 33,
                   height: 40,
                   //color: Colors.blue[50],
                   child: Image.asset('assets/logo.png', color: ColorUtils.fromHex("#613AF5")),

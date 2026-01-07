@@ -260,28 +260,30 @@ class _DashboardScreen_oldState extends State<DashboardScreen_old> {
           const SizedBox(height: 30),
         ],
       ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.only(left: 30.0, right: 30.0, bottom: 20.0),
-        child: ElevatedButton(
-          onPressed: _isNavigating ? null : () => _navigateToDigiLockerAuth(context, 'get started'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF613AF5),
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10.0),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.only(left: 30.0, right: 30.0, bottom: 20.0),
+          child: ElevatedButton(
+            onPressed: _isNavigating ? null : () => _navigateToDigiLockerAuth(context, 'get started'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF613AF5),
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0),
+              ),
             ),
-          ),
-          child: _isNavigating
-              ? const SizedBox(
-            height: 20, width: 20,
-            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-          )
-              : Text(
-            'Get Started',
-            style: GoogleFonts.inter(
-              fontSize: 16,
-              color: ColorUtils.fromHex("#FFFFFF"),
-              fontWeight: FontWeight.w500,
+            child: _isNavigating
+                ? const SizedBox(
+              height: 20, width: 20,
+              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+            )
+                : Text(
+              'Get Started',
+              style: GoogleFonts.inter(
+                fontSize: 16,
+                color: ColorUtils.fromHex("#FFFFFF"),
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
         ),
@@ -362,7 +364,7 @@ class _DashboardScreen_oldState extends State<DashboardScreen_old> {
         CarouselSlider.builder(
           itemCount: AppConstants.appSlides.length,
           options: CarouselOptions(
-            height: 180,
+            height: 150,
             enlargeCenterPage: true,
             viewportFraction: (screenWidth - 10) / screenWidth,
             autoPlay: true,
@@ -375,7 +377,7 @@ class _DashboardScreen_oldState extends State<DashboardScreen_old> {
                 elevation: 4,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 clipBehavior: Clip.hardEdge,
-                child: Image.asset(slide["image"]!, fit: BoxFit.cover),
+                child: Image.asset(slide["image"]!, fit: BoxFit.fitHeight),
               ),
             );
           },
