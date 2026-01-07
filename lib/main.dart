@@ -19,7 +19,6 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   await LocalNotificationService.init();
-  await LocalNotificationService.requestNotificationPermission();
   await ConfigService.loadConfig();
 
   runApp(const MyApp());

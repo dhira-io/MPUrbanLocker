@@ -97,7 +97,7 @@ class _DocumentPreviewState extends State<DocumentPreview> {
   Future<void> _saveToDownloads(Uint8List bytes, String name) async {
     if (Platform.isAndroid) {
       final file =
-     await File('/storage/emulated/0/Download/$name.pdf').writeAsBytes(bytes);
+      await File('/storage/emulated/0/Download/$name.pdf').writeAsBytes(bytes);
 
       if ((await file).path.isNotEmpty) {
         _showSnackBar('Document Successfully Downloaded', Colors.green);
