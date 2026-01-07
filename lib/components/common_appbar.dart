@@ -1,5 +1,6 @@
 import 'package:digilocker_flutter/screens/AboutMpUrbanLockerScreen.dart';
 import 'package:digilocker_flutter/screens/FAQScreen.dart';
+import 'package:digilocker_flutter/screens/NotificationScreen.dart';
 import 'package:digilocker_flutter/screens/PrivacyPolicyScreen.dart';
 import 'package:digilocker_flutter/screens/TermsConditionScreen.dart';
 import 'package:flutter/material.dart';
@@ -45,8 +46,13 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.qr_code_scanner, color: Colors.black),
-          onPressed: () {},
+          icon: const Icon(Icons.notifications, color: Colors.black),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => NotificationScreen()),
+            );
+          },
         ),
         Builder(
           builder: (context) => IconButton(

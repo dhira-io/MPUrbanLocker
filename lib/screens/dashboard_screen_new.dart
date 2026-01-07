@@ -3,6 +3,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:digilocker_flutter/models/doc_service_config.dart';
 import 'package:digilocker_flutter/screens/myDocuments_screen.dart';
 import 'package:digilocker_flutter/screens/profile_screen.dart';
+import 'package:digilocker_flutter/screens/scheme_screen.dart';
 import 'package:digilocker_flutter/utils/color_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -53,8 +54,9 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
     super.initState();
     _pages = <Widget>[
       _buildHomePage(), // Index 0: Home/Dashboard Content
-      MyDocumentsScreen(), // Index 1: Docs & Services
-      NotificationScreen(), // Index 2: Notifications
+      MyDocumentsScreen(),
+      SchemeScreen(),// Index 1: Docs & Services
+      //NotificationScreen(), // Index 2: Notifications
       const ProfileScreen(), // Index 3: Profile
     ];
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -263,6 +265,97 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
             // : _buildDocumentsList(context),
         const SizedBox(height: 20),
 
+        //scheme card
+
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF0D1E4B), Color(0xFF1A3B8B)], // Navy Blue Gradient
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Flexible(
+                    child: Text(
+                      'Schemes you are eligible for',
+                      style: GoogleFonts.inter(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: ColorUtils.fromHex("#FFFFFF"),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: ColorUtils.fromHex("#FF8C00"),
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Text('New Matches', style: GoogleFonts.inter(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      color: ColorUtils.fromHex("#FFFFFF"),
+                    ),),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+               Text(
+                'Based on your fetched documents, MP Locker intelligently identifies government schemes that are recommended to you.',
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w400,
+                  color: ColorUtils.fromHex("#DBEAFE"),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Check which government benefits you can access today.',
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: ColorUtils.fromHex("#DBEAFE"),
+                ),
+              ),
+              const SizedBox(height: 20),
+              // White Button
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedIndex = 2;  // Switch to the Schemes tab
+                  });
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('View All Schemes', style: GoogleFonts.inter(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                        color: ColorUtils.fromHex("#613AF5"),
+                      ),),
+                      const SizedBox(width: 8),
+                      Icon(Icons.arrow_forward_ios, size: 16, color: ColorUtils.fromHex("#613AF5")),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 20),
+
         // 5. Issued Documents section
         Padding(
           padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16),
@@ -374,8 +467,8 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
               label: 'Docs& Services',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.notifications),
-              label: 'Notifications',
+              icon: Icon(Icons.verified),
+              label: 'Schemes',
             ),
             BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
           ],
@@ -636,10 +729,15 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
       actions: [
         IconButton(
           icon: Icon(
-            Icons.qr_code_scanner,
+            Icons.notifications,
             color: ColorUtils.fromHex("#212121"),
           ),
-          onPressed: () {},
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => NotificationScreen()),
+            );
+          },
         ),
         Builder(
           builder: (context) => IconButton(
@@ -747,7 +845,7 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
                 clipBehavior: Clip.hardEdge,
                 child: Image.asset(
                   slide["image"]!,
-                  fit: BoxFit.fitHeight,
+                  fit: BoxFit.fitWidth,
                   width: double.infinity,
                   height: double.infinity,
                 ),

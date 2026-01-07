@@ -457,7 +457,7 @@ class _MyDocumentsScreenState extends State<MyDocumentsScreen> {
                 clipBehavior: Clip.hardEdge,
                 child: Image.asset(
                   slide["image"]!,
-                  fit: BoxFit.cover,
+                  fit: BoxFit.fitWidth,
                   width: double.infinity,
                   height: double.infinity,
                 ),
@@ -467,6 +467,7 @@ class _MyDocumentsScreenState extends State<MyDocumentsScreen> {
         ),
 
         const SizedBox(height: 8),
+/*
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: List.generate(
@@ -484,6 +485,7 @@ class _MyDocumentsScreenState extends State<MyDocumentsScreen> {
             ),
           ),
         ),
+*/
       ],
     );
   }

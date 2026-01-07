@@ -377,7 +377,7 @@ class _DashboardScreen_oldState extends State<DashboardScreen_old> {
                 elevation: 4,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 clipBehavior: Clip.hardEdge,
-                child: Image.asset(slide["image"]!, fit: BoxFit.fitHeight),
+                child: Image.asset(slide["image"]!, fit: BoxFit.fitWidth),
               ),
             );
           },

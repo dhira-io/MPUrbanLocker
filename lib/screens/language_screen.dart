@@ -38,7 +38,7 @@ class LanguageScreen extends StatelessWidget {
               height: 40,
               child: Image.asset(logoImage, color: const Color(0xff613AF5)),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: 20),
             Flexible(
               child:  Text(
                 'MP Urban Locker',
