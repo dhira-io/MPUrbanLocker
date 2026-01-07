@@ -47,5 +47,13 @@
     <true/>
     <key>LSSupportsOpeningDocumentsInPlace</key>
     <true/>
+    <key>NSUserNotificationsUsageDescription</key>
+    <string>This app uses notifications to show download status</string>
+
+    <!-- Allow background notification delivery -->
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>remote-notification</string>
+    </array>
 </dict>
 </plist>
