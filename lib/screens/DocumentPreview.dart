@@ -218,7 +218,13 @@ class _DocumentPreviewState extends State<DocumentPreview> {
             icon: const Icon(Icons.arrow_back_ios),
             onPressed: () => Navigator.pop(context),
           ),
-          Text(widget.title),
+          Expanded(
+            child: Text(
+              widget.title,
+              style: const TextStyle(fontSize: 18),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
         ],
       ),
     );

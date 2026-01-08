@@ -1,15 +1,13 @@
-import 'dart:convert';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:digilocker_flutter/models/doc_service_config.dart';
 import 'package:digilocker_flutter/screens/myDocuments_screen.dart';
 import 'package:digilocker_flutter/screens/profile_screen.dart';
-import 'package:digilocker_flutter/screens/scheme_screen.dart';
+import 'package:digilocker_flutter/screens/comingsoon_screen.dart';
 import 'package:digilocker_flutter/utils/color_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/document.dart';
@@ -153,7 +151,7 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
       _selectedIndex = index;
     });
     // Ensure the Home page content is refreshed if switching away/back
-    _pages[0] = _buildHomePage();
+    // _pages[0] = _buildHomePage();
   }
 
   // --- WIDGET FOR HOME TAB CONTENT (Index 0) ---
@@ -502,8 +500,23 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
   // --- MAIN BUILD METHOD ---
   @override
   Widget build(BuildContext context) {
-    _pages[0] = _buildHomePage();
-
+    Widget currentBody;
+    switch (_selectedIndex) {
+      case 0:
+        currentBody = _buildHomePage();
+        break;
+      case 1:
+        currentBody = MyDocumentsScreen();
+        break;
+      case 2:
+        currentBody = NotificationScreen();
+        break;
+      case 3:
+        currentBody = const ProfileScreen();
+        break;
+      default:
+        currentBody = _buildHomePage();
+    }
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) async {
@@ -516,7 +529,7 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
       },
       child: Scaffold(
         appBar: _buildAppBar(),
-        body: _pages[_selectedIndex],
+        body: currentBody,
         // Displays the content of the selected tab
         bottomNavigationBar: BottomNavigationBar(
           currentIndex: _selectedIndex,
@@ -626,7 +639,12 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
               leading: Image.asset('assets/drive.png'),
               title: const Text('Documents Drive'),
               trailing: Icon(Icons.arrow_forward_ios),
-              onTap: () => Navigator.pop(context),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => ComingSoonScreen(docType: "Documents Drive")),
+                );
+              },
             ),
             Divider(color: Color(0xffDDDDDD)),
 
@@ -634,7 +652,12 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
               leading: Image.asset('assets/settings.png'),
               title: const Text('Settings'),
               trailing: Icon(Icons.arrow_forward_ios),
-              onTap: () => Navigator.pop(context),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => ComingSoonScreen(docType: "Settings")),
+                );
+              },
             ),
             Divider(color: Color(0xffDDDDDD)),
 
@@ -642,7 +665,12 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
               leading: Image.asset('assets/shield.png'),
               title: const Text('Validate Certificate'),
               trailing: Icon(Icons.arrow_forward_ios),
-              onTap: () => Navigator.pop(context),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => ComingSoonScreen(docType: "Validate Certificate")),
+                );
+              },
             ),
             Divider(color: Color(0xffDDDDDD)),
 
@@ -650,7 +678,12 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
               leading: Image.asset('assets/log.png'),
               title: const Text('Activity Log'),
               trailing: Icon(Icons.arrow_forward_ios),
-              onTap: () => Navigator.pop(context),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => ComingSoonScreen(docType: "Activity Log")),
+                );
+              },
             ),
             Divider(color: Color(0xffDDDDDD)),
 
@@ -658,7 +691,12 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
               leading: Image.asset('assets/contact.png'),
               title: const Text('Contact Support'),
               trailing: Icon(Icons.arrow_forward_ios),
-              onTap: () => Navigator.pop(context),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => ComingSoonScreen(docType: "Contact Support")),
+                );
+              },
             ),
             Divider(color: Color(0xffDDDDDD)),
 
@@ -887,57 +925,58 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
             viewportFraction: (screenWidth - 10) / screenWidth,
 
             autoPlay: true,
-            autoPlayInterval: Duration(seconds: 5),
-            autoPlayAnimationDuration: Duration(milliseconds: 800),
-            autoPlayCurve: Curves.easeInOut,
-
+            autoPlayInterval: const Duration(seconds: 5),
             onPageChanged: (index, reason) {
               provider.setIndex(index);
             },
           ),
           itemBuilder: (context, index, realIndex) {
             final slide = AppConstants.appSlides[index];
-            return SizedBox(
-              width: screenWidth - 20,
-              child: Card(
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                clipBehavior: Clip.hardEdge,
+            return Container(
+              // The horizontal margin creates the visible gap between slides
+              margin: const EdgeInsets.symmetric(horizontal: 8.0),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 5,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
                 child: Image.asset(
                   slide["image"]!,
-                  fit: BoxFit.fitWidth,
+                  fit: BoxFit.fitWidth, // Ensures the image fills the card without gaps inside
                   width: double.infinity,
-                  height: double.infinity,
                 ),
               ),
             );
           },
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
+        // Animated Dots
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(
-            AppConstants.appSlides.length,
-                (index) => Container(
+          children: AppConstants.appSlides.asMap().entries.map((entry) {
+            bool isActive = provider.currentIndex == entry.key;
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
               margin: const EdgeInsets.symmetric(horizontal: 4),
-              width: provider.currentIndex == index ? 12 : 8,
-              height: provider.currentIndex == index ? 12 : 8,
+              width: isActive ? 20 : 8, // Expansion effect for active dot
+              height: 8,
               decoration: BoxDecoration(
-                color: provider.currentIndex == index
-                    ? const Color(0xFF5C3AFF)
-                    : Colors.grey.shade300,
-                shape: BoxShape.circle,
+                color: isActive ? const Color(0xFF5C3AFF) : Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(4),
               ),
-            ),
-          ),
+            );
+          }).toList(),
         ),
-
       ],
     );
   }
-
   // --- HORIZONTAL DOCUMENTS LIST (Popular Docs) ---
   // This now uses the original, unfiltered list of services
   Widget _buildDocumentsList(context) {
@@ -992,7 +1031,7 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
   Widget _buildQuickActionTile(String title, IconData icon, Color color) {
     return GestureDetector(
       onTap: () {
-        print("Quick Action: $title");
+        Navigator.push(context, MaterialPageRoute(builder: (_) => ComingSoonScreen(docType: title)));
       },
       child: Container(
         padding: const EdgeInsets.all(8.0),

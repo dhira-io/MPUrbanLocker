@@ -430,64 +430,63 @@ class _MyDocumentsScreenState extends State<MyDocumentsScreen> {
           ),
           const SizedBox(height: 8),
         ],
-
         CarouselSlider.builder(
           itemCount: AppConstants.appSlides.length,
           options: CarouselOptions(
             height: 160,
             enlargeCenterPage: true,
+            // Setting this below 1.0 creates the space for the next/prev slides
             viewportFraction: (screenWidth - 10) / screenWidth,
-
-            //auto play
-            autoPlay: true,                // Enable auto scroll
-            autoPlayInterval: Duration(seconds: 5), // Duration between slides
-            autoPlayAnimationDuration: Duration(milliseconds: 800),
-            autoPlayCurve: Curves.easeInOut,
-
+            autoPlay: true,
+            autoPlayInterval: const Duration(seconds: 5),
             onPageChanged: (index, reason) {
               provider.setIndex(index);
             },
           ),
           itemBuilder: (context, index, realIndex) {
             final slide = AppConstants.appSlides[index];
-            return SizedBox(
-              width: screenWidth - 20,
-              child: Card(
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-                clipBehavior: Clip.hardEdge,
+            return Container(
+              // The horizontal margin creates the visible gap between slides
+              margin: const EdgeInsets.symmetric(horizontal: 8.0),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 5,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
                 child: Image.asset(
                   slide["image"]!,
-                  fit: BoxFit.fitWidth,
+                  fit: BoxFit.fitWidth, // Ensures the image fills the card without gaps inside
                   width: double.infinity,
-                  height: double.infinity,
                 ),
               ),
             );
           },
         ),
-
-        const SizedBox(height: 8),
-
+        const SizedBox(height: 12),
+        // Animated Dots
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(
-            AppConstants.appSlides.length,
-                (index) => Container(
+          children: AppConstants.appSlides.asMap().entries.map((entry) {
+            bool isActive = provider.currentIndex == entry.key;
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
               margin: const EdgeInsets.symmetric(horizontal: 4),
-              width: provider.currentIndex == index ? 12 : 8,
-              height: provider.currentIndex == index ? 12 : 8,
+              width: isActive ? 20 : 8, // Expansion effect for active dot
+              height: 8,
               decoration: BoxDecoration(
-                color: provider.currentIndex == index
-                    ? const Color(0xFF5C3AFF)
-                    : Colors.grey.shade300,
-                shape: BoxShape.circle,
+                color: isActive ? const Color(0xFF5C3AFF) : Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(4),
               ),
-            ),
-          ),
+            );
+          }).toList(),
         ),
-
       ],
     );
   }

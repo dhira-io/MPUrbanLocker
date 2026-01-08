@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../components/common_appbar.dart';
 import '../models/doc_service_config.dart';
 import '../services/api_service.dart';
 import '../services/config_service.dart';
+import '../utils/color_utils.dart';
 import '../utils/constants.dart';
 import 'DocumentPreview.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -48,9 +50,10 @@ class _ComingSoonScreenState extends State<ComingSoonScreen> {
                   Flexible(
                     child: Text(
                       widget.docType,
-                      style: const TextStyle(
+                      style: GoogleFonts.inter(
                         fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w600,
+                        color: ColorUtils.fromHex("#1F2937"),
                       ),
                     ),
                   ),
@@ -65,43 +68,46 @@ class _ComingSoonScreenState extends State<ComingSoonScreen> {
                       Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: Colors.deepPurple.shade50,
+                          color: ColorUtils.fromHex("#EFF6FF"),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(
-                          Icons.insert_drive_file_outlined,
-                          color: Colors.deepPurple,
+                        child: Icon(
+                          Icons.file_copy_outlined,
+                          color: ColorUtils.fromHex("#613AF5"),
                           size: 48,
                         ),
                       ),
                       const SizedBox(height: 24),
-                      const Text(
+                      Text(
                         'Coming Soon!',
-                        style: TextStyle(
+                        style: GoogleFonts.inter(
                           fontSize: 24,
                           fontWeight: FontWeight.w700,
-                          color: Colors.deepPurple,
+                          color: ColorUtils.fromHex("#6D28D9"),
                         ),
                       ),
                       const SizedBox(height: 12),
-                      const Text(
+                      Text(
                         'This feature is currently under\n'
                             'development and will be shortly in\n'
                             'MP Urban Locker.',
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.black54,
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                          color: ColorUtils.fromHex("#4B5563"),
                         ),
                       ),
                       const SizedBox(height: 8),
-                      const Text(
-                        "We're working to bring you a more secure\n"
+                      Text(
+                        "We're working to bring you a more secure "
                             'and seamless experience.',
                         textAlign: TextAlign.center,
-                        style: TextStyle(
+                        style: GoogleFonts.inter(
                           fontSize: 14,
-                          color: Colors.black45,
+                          fontWeight: FontWeight.w400,
+                          color: ColorUtils.fromHex("#6B7280"),
+                          fontStyle: FontStyle.italic
                         ),
                       )
                     ],
