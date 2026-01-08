@@ -153,7 +153,7 @@ class _CreateDocumentFormState extends State<CreateDocumentForm> {
                                 ),
                               ),
                               SizedBox(width: 8),
-                              Image.asset('assets/speaker.png'),
+                              //Image.asset('assets/speaker.png'),
                             ],
                           ),
                         ),

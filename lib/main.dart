@@ -5,6 +5,7 @@ import 'package:digilocker_flutter/providers/license_provider.dart';
 import 'package:digilocker_flutter/providers/login_provider.dart';
 import 'package:digilocker_flutter/providers/onboarding_provider.dart';
 import 'package:digilocker_flutter/providers/otp_provider.dart';
+import 'package:digilocker_flutter/providers/scheme_provider.dart';
 import 'package:digilocker_flutter/services/LocalNotificationServices.dart';
 import 'package:digilocker_flutter/services/api_service.dart';
 import 'package:digilocker_flutter/services/config_service.dart';
@@ -39,6 +40,8 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => SetpinProvider()),
         ChangeNotifierProvider(create: (_) => LicenseProvider()),
         ChangeNotifierProvider(create: (_) => DrawerProvider()),
+        ChangeNotifierProvider(create: (_) => SchemeProvider()),
+
         Provider<ApiService>(
           create: (_) => ApiService(),
           dispose: (_, service) => service.dispose(),
