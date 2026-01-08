@@ -127,7 +127,7 @@ class ApiService {
       'useMobileRedirect': useMobileRedirect,
     };
     debugPrint('📤 Creating session with: $requestBody');
-    Map<String, dynamic> body = await _postRequest(
+    Map<String, dynamic> body = await postRequest(
       AppConstants.sessionEndpoint,
       includeAuth: false,
       body: requestBody,
@@ -148,7 +148,7 @@ class ApiService {
     required String state,
     String? jti,
   }) async {
-    Map<String, dynamic> response = await _postRequest(
+    Map<String, dynamic> response = await postRequest(
       AppConstants.callbackEndpoint,
       includeAuth: false,
       body: {'code': code, 'state': state, if (jti != null) 'jti': jti},
@@ -177,7 +177,7 @@ class ApiService {
   // ==================== Demo Login ====================
 
   Future<Map<String, dynamic>> demoSendOtp(String phone) async {
-    Map<String, dynamic> response = await _postRequest(
+    Map<String, dynamic> response = await postRequest(
       "${AppConstants.demoSendOTPEndpoint}",
       includeAuth: false,
       body: {'phone': phone},
@@ -186,7 +186,7 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> demoVerifyOtp(String phone, String otp) async {
-    Map<String, dynamic> response = await _postRequest(
+    Map<String, dynamic> response = await postRequest(
       "${AppConstants.demoVerifyOTPEndpoint}",
       includeAuth: false,
       body: {'phone': phone, 'otp': otp},
@@ -260,11 +260,11 @@ class ApiService {
     required String endpoint,
     required Map<String, dynamic> payload,
   }) async {
-    return await _postRequest(endpoint, includeAuth: true, body: payload);
+    return await postRequest(endpoint, includeAuth: true, body: payload);
   }
 
 
-  Future<Map<String, dynamic>> _postRequest(
+  Future<Map<String, dynamic>> postRequest(
     String endpoint, {
     bool includeAuth = true,
     Map<String, dynamic>? body,

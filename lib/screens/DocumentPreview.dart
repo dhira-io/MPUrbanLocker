@@ -1,7 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:provider/provider.dart';
 
+import 'package:digilocker_flutter/screens/share_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:http/http.dart' as http;
@@ -12,18 +15,19 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../components/common_appbar.dart';
 import '../services/LocalNotificationServices.dart';
+import '../services/api_service.dart';
 import '../utils/constants.dart';
 
 class DocumentPreview extends StatefulWidget {
   final String title;
-  final String? uri;
+  final String docId;
   final String date;
   final String pdfString;
 
   const DocumentPreview({
     super.key,
     required this.title,
-    this.uri,
+    required this.docId,
     required this.date,
     required this.pdfString,
   });
@@ -49,29 +53,39 @@ class _DocumentPreviewState extends State<DocumentPreview> {
     final pref = await SharedPreferences.getInstance();
     final accessToken = await pref.getString(AppConstants.tokenKey) ?? '';
     final userId = await pref.getString(AppConstants.userIdKey) ?? '';
-
-    final response = await http.get(
-      Uri.parse(
-        '${AppConstants.baseUrl}${AppConstants.documentFileEndpoint(userId, widget.uri ?? "")}',
-      ),
-      headers: {
-        'Authorization': 'Bearer $accessToken',
-        'Accept': 'application/json',
-      },
-    );
-
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      final dir = await getTemporaryDirectory();
-      final file = File(
-        '${dir.path}/${widget.title.replaceAll(' ', '_')}.pdf',
+    final apiService = context.read<ApiService>();
+    try {
+      final response = await apiService.postRequest(
+        AppConstants.documentsFetchByDocIDEndpoint,
+        body: {"document": widget.docId},
+        includeAuth: true,
       );
-
-      await file.writeAsBytes(response.bodyBytes);
-
-      setState(() {
-        localPdfPath = file.path;
-        bytesOfDoc = response.bodyBytes;
-      });
+      print(response);
+      if (response['success'] == true && response['data'] != null) {
+        final Map<String, dynamic> decodedData = response;
+        final dir = await getTemporaryDirectory();
+        final file = File(
+          '${dir.path}/${widget.title.replaceAll(' ', '_')}.pdf',
+        );
+        String strPdf = response['data']["pdf"];
+        final bytes = base64Decode(strPdf);
+        await file.writeAsBytes(bytes);
+        setState(() {
+          localPdfPath = file.path;
+          bytesOfDoc = bytes;
+        });
+      } else {
+        String errorMessage = response['message'] ?? 'Something went wrong';
+        Fluttertoast.showToast(msg: errorMessage);
+      }
+    } on NoInternetException catch (e) {
+      Fluttertoast.showToast(msg: '${e.toString()}');
+    } catch (e) {
+      debugPrint('Fetch Error: $e');
+      Fluttertoast.showToast(msg: '${e.toString()}');
+    } finally {
+      // _isLoading = false;
+      // notifyListeners();
     }
   }
 
@@ -79,8 +93,9 @@ class _DocumentPreviewState extends State<DocumentPreview> {
   Future<void> _convertBase64ToFile(String base64Pdf) async {
     final bytes = base64Decode(base64Pdf);
     final dir = await getTemporaryDirectory();
-    final file =
-    File('${dir.path}/${DateTime.now().microsecondsSinceEpoch}.pdf');
+    final file = File(
+      '${dir.path}/${DateTime.now().microsecondsSinceEpoch}.pdf',
+    );
 
     await file.writeAsBytes(bytes);
 
@@ -93,28 +108,33 @@ class _DocumentPreviewState extends State<DocumentPreview> {
   /// ⬇ Save / Share PDF
   Future<void> _saveToDownloads(Uint8List bytes, String name) async {
     if (Platform.isAndroid) {
-      final file =
-      await File('/storage/emulated/0/Download/$name.pdf').writeAsBytes(bytes);
+      final file = await File(
+        '/storage/emulated/0/Download/$name.pdf',
+      ).writeAsBytes(bytes);
 
       if ((await file).path.isNotEmpty) {
         _showSnackBar('Document Successfully Downloaded', Colors.green);
         // Show notification
         await LocalNotificationService.showNotification(
-            title: 'Download Complete', body: '$name.pdf downloaded',
-            filePath: file.path);
+          title: 'Download Complete',
+          body: '$name.pdf downloaded',
+          filePath: file.path,
+        );
       } else {
         _showSnackBar('Download failed', Colors.red);
       }
     } else if (Platform.isIOS) {
       final dir = await getApplicationDocumentsDirectory();
       final file = File('${dir.path}/$name.pdf');
-      await file.writeAsBytes(bytes ,flush: true);
+      await file.writeAsBytes(bytes, flush: true);
       if ((await file).path.isNotEmpty) {
         _showSnackBar('Document Successfully Downloaded', Colors.green);
         // Show notification
         await LocalNotificationService.showNotification(
-            title: 'Download Complete', body: '$name.pdf downloaded',
-            filePath: file.path);
+          title: 'Download Complete',
+          body: '$name.pdf downloaded',
+          filePath: file.path,
+        );
       } else {
         _showSnackBar('Download failed', Colors.red);
       }
@@ -126,8 +146,7 @@ class _DocumentPreviewState extends State<DocumentPreview> {
     try {
       final pref = await SharedPreferences.getInstance();
       final userId = await pref.getString(AppConstants.userIdKey) ?? '';
-      final fileName =
-      '${widget.title}_$userId'.replaceAll('/', '');
+      final fileName = '${widget.title}_$userId'.replaceAll('/', '');
 
       await _saveToDownloads(bytesOfDoc!, fileName);
     } catch (e) {
@@ -220,8 +239,7 @@ class _DocumentPreviewState extends State<DocumentPreview> {
               color: const Color(0xFF1DBF73),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(Icons.check,
-                color: Color(0xFFDFF7EA), size: 16),
+            child: const Icon(Icons.check, color: Color(0xFFDFF7EA), size: 16),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -231,21 +249,23 @@ class _DocumentPreviewState extends State<DocumentPreview> {
                 const Text(
                   'Document Verified',
                   style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF1DBF73),
-                      fontSize: 14),
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1DBF73),
+                    fontSize: 14,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 const Text(
                   'This document has been validated and is authentic.',
-                  style:
-                  TextStyle(fontSize: 12, color: Color(0xFF55DA91)),
+                  style: TextStyle(fontSize: 12, color: Color(0xFF55DA91)),
                 ),
                 const SizedBox(height: 6),
                 Text(
                   'Verified on ${_formatDate(widget.date)}',
-                  style:
-                  const TextStyle(fontSize: 11, color: Color(0xFF55DA91)),
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: Color(0xFF55DA91),
+                  ),
                 ),
               ],
             ),
@@ -264,15 +284,15 @@ class _DocumentPreviewState extends State<DocumentPreview> {
       child: localPdfPath == null
           ? const Center(child: CircularProgressIndicator())
           : ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: PDFView(
-          filePath: localPdfPath!,
-          enableSwipe: true,
-          swipeHorizontal: false,
-          autoSpacing: true,
-          pageFling: true,
-        ),
-      ),
+              borderRadius: BorderRadius.circular(16),
+              child: PDFView(
+                filePath: localPdfPath!,
+                enableSwipe: true,
+                swipeHorizontal: false,
+                autoSpacing: true,
+                pageFling: true,
+              ),
+            ),
     );
   }
 
@@ -284,13 +304,16 @@ class _DocumentPreviewState extends State<DocumentPreview> {
           _downloadPdf();
         },
         icon: const Icon(Icons.download, color: Colors.white),
-        label: const Text('Download Document',
-            style: TextStyle(color: Colors.white)),
+        label: const Text(
+          'Download Document',
+          style: TextStyle(color: Colors.white),
+        ),
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFF5A48F5),
           padding: const EdgeInsets.symmetric(vertical: 14),
-          shape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
         ),
       ),
     );
@@ -301,13 +324,20 @@ class _DocumentPreviewState extends State<DocumentPreview> {
       children: [
         Expanded(
           child: OutlinedButton.icon(
-            onPressed: () {},
+            onPressed: () {
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(
+              //     builder: (context) => ShareScreen(documentTitle: widget.title),
+              //   ),
+              // );
+            },
             icon: const Icon(Icons.share),
             label: const Text('Share Document'),
           ),
         ),
         const SizedBox(width: 12),
-/*
+        /*
         Expanded(
           child: OutlinedButton.icon(
             onPressed: () {},

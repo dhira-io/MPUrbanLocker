@@ -7,6 +7,7 @@ import 'package:digilocker_flutter/screens/scheme_screen.dart';
 import 'package:digilocker_flutter/utils/color_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
@@ -14,6 +15,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/document.dart';
 import '../providers/auth_provider.dart';
 import '../providers/onboarding_provider.dart'; // Used for Carousel index
+import '../services/api_service.dart';
 import '../services/config_service.dart';
 import '../utils/constants.dart';
 import 'AboutMpUrbanLockerScreen.dart';
@@ -102,36 +104,20 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
 
   Future<void> getDocuments() async {
     List<Document> loadedDocs = [];
-    try {
-      final pref = await SharedPreferences.getInstance();
-      final accessToken = await pref.getString(AppConstants.tokenKey);
-      final userId = await pref.getString(AppConstants.userIdKey);
+       // Only fetch documents if the user is logged in
+        try {
+          final pref =await SharedPreferences.getInstance();
+          String userId = await pref.getString(AppConstants.userIdKey) ?? "";
+          final apiService = context.read<ApiService>();
 
-      // Only fetch documents if the user is logged in
-      if (accessToken != null && userId != null && accessToken.isNotEmpty) {
-        final uri = Uri.parse(
-          '${AppConstants.baseUrl}${AppConstants.userDocumentsEndpoint(userId)}',
-        );
-        print(
-          "$accessToken \n$userId  \n${AppConstants.baseUrl}${AppConstants.userDocumentsEndpoint(userId)}",
-        );
-        final response = await http.get(
-          uri,
-          headers: {
-            "Authorization": "Bearer $accessToken",
-            "Accept": "application/json",
-          },
-        );
+          final Map<String, dynamic> response = await apiService.getRequest(
+            AppConstants.userDocumentsEndpoint(userId),
+            includeAuth: true,
+          );
 
-        if (response.statusCode >= 200 && response.statusCode < 300) {
-          final Map<String, dynamic> body =
-              jsonDecode(response.body) as Map<String, dynamic>;
-
-          debugPrint("📄 Documents API response: $body");
-
-          if (body['success'] == true) {
+          if (response['success'] == true && response['data'] != null) {
             final Map<String, dynamic> data =
-                body['data'] as Map<String, dynamic>;
+            response['data'] as Map<String, dynamic>;
 
             final List<dynamic> documents = (data['documents'] as List?) ?? [];
             List<Document> arrdocuments = documents
@@ -142,23 +128,23 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
                 if (doc.doctype != null) doc.doctype!: doc,
             }.values.toList();
           } else {
-            debugPrint("❌ API returned success=false");
+            String errorMessage = response['message'] ?? 'Something went wrong';
+            Fluttertoast.showToast(msg: errorMessage);
           }
-        } else {
-          debugPrint("❌ Failed to fetch documents: ${response.body}");
+        } on NoInternetException catch (e) {
+          debugPrint('Fetch Error: $e');
+          Fluttertoast.showToast(msg: '${e.toString()}');
+        } catch (e) {
+          debugPrint('Fetch Error: $e');
+          Fluttertoast.showToast(msg: '${e.toString()}');
+        } finally {
+          if (mounted) {
+            setState(() {
+              isLoading = false;
+              issuedDocs = loadedDocs;
+            });
+          }
         }
-      }
-    } catch (e) {
-      debugPrint("Error fetching documents: $e");
-    } finally {
-      // This block always runs, ensuring the loading indicator is turned off
-      if (mounted) {
-        setState(() {
-          isLoading = false;
-          issuedDocs = loadedDocs;
-        });
-      }
-    }
   }
 
   // --- BOTTOM NAV NAVIGATION HANDLER ---
@@ -1030,7 +1016,7 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
                 builder: (_) => DocumentPreview(
                   title: doc.name ?? "",
                   date: doc.date ?? "N/A",
-                  uri: doc.uri,
+                  docId: doc.id,
                   pdfString: '',
                 ),
               ),
@@ -1058,7 +1044,10 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
       MaterialPageRoute(
         builder: (_) => CreateDocumentForm(docType: documentType),
       ),
-    );
+    ).then((_) {
+      print("refresh call");
+      getDocuments();
+    });
   }
 }
 

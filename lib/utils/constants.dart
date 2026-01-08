@@ -32,6 +32,7 @@ class AppConstants {
   //scheme
   static const String schemeMatchesEndpoint = '/api/users/me/scheme-matches?min_percentage=0';
   static const String documentsExpiryEndpoint = '/api/users/me/documents-expiry';
+  static const String documentsFetchByDocIDEndpoint = '/api/users/me/documents/fetch';
 
 
 
@@ -43,7 +44,6 @@ class AppConstants {
       '/api/users/$userId/documents';
   static String documentFileEndpoint(String userId, String docId) =>
       '/api/users/$userId/documents/$docId/file';
-
 
 
 
