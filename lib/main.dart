@@ -24,10 +24,7 @@ Future<void> main() async {
   await ConfigService.loadConfig();
 
   runApp(
-    GetMaterialApp(
-      debugShowCheckedModeBanner: false,
-      home:const MyApp(),
-    ),
+    const MyApp(),
   );
 }
 
@@ -59,7 +56,7 @@ class MyApp extends StatelessWidget {
           previous ?? AuthProvider(apiService: apiService),
         ),
       ],
-      child: MaterialApp(
+      child: GetMaterialApp(
         debugShowCheckedModeBanner: false,
         color: Color(0xff613AF5),
         home: SplashScreen(),
