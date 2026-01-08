@@ -111,15 +111,19 @@ class _MyDocumentsScreenState extends State<MyDocumentsScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Most Popular Documents',
-                style: GoogleFonts.inter(
-                  fontSize: 18,
-                  color: ColorUtils.fromHex("#1F2937"),
-                  fontWeight: FontWeight.w600,
+              // Wrap the title in Expanded to prevent right-side overflow
+              Expanded(
+                child: Text(
+                  'Most Popular Documents',
+                  style: GoogleFonts.inter(
+                    fontSize: 18,
+                    color: ColorUtils.fromHex("#1F2937"),
+                    fontWeight: FontWeight.w600,
+                  ),
+                  //overflow: TextOverflow.ellipsis, // Optional: adds '...' if too long
                 ),
               ),
-/*
+              const SizedBox(width: 5), // Give some breathing room between text and button
               GestureDetector(
                 onTap: () {
                   setState(() {
@@ -135,21 +139,19 @@ class _MyDocumentsScreenState extends State<MyDocumentsScreen> {
                   ),
                 ),
               ),
-*/
             ],
           ),
         ),
-
         // --- LIST OR GRID BASED ON toggle ---
-        //showAllPopularDocs ?
-             _buildPopularDocsGrid(context),
-           // : _buildDocumentsList(context),
+        showAllPopularDocs ?
+             _buildPopularDocsGrid(context)
+           : _buildDocumentsList(context),
         const SizedBox(height: 20),
 
         // Categories Section
-     /*   _buildSectionTitle(title: 'Categories', showViewAll: true),
+        _buildSectionTitle(title: 'Categories', showViewAll: true),
         _buildCategoriesGrid(),
-        const SizedBox(height: 30),*/
+        const SizedBox(height: 30),
 
         // What's New Section (using the banner image from the screenshot)
         _buildBannerPlaceholder(context, "What's New"),
@@ -314,7 +316,7 @@ class _MyDocumentsScreenState extends State<MyDocumentsScreen> {
           crossAxisCount: 2,
           mainAxisSpacing: 12,
           crossAxisSpacing: 12,
-          childAspectRatio: 1,
+          childAspectRatio: 1.3,
         ),
         itemBuilder: (context, index) {
           final docConfig = ConfigService.docServices[index];
@@ -438,7 +440,7 @@ class _MyDocumentsScreenState extends State<MyDocumentsScreen> {
 
             //auto play
             autoPlay: true,                // Enable auto scroll
-            autoPlayInterval: Duration(seconds: 3), // Duration between slides
+            autoPlayInterval: Duration(seconds: 5), // Duration between slides
             autoPlayAnimationDuration: Duration(milliseconds: 800),
             autoPlayCurve: Curves.easeInOut,
 
@@ -467,7 +469,7 @@ class _MyDocumentsScreenState extends State<MyDocumentsScreen> {
         ),
 
         const SizedBox(height: 8),
-/*
+
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: List.generate(
@@ -485,7 +487,7 @@ class _MyDocumentsScreenState extends State<MyDocumentsScreen> {
             ),
           ),
         ),
-*/
+
       ],
     );
   }
@@ -553,13 +555,12 @@ class CategoryCard extends StatelessWidget {
                 style: GoogleFonts.inter(
                   fontSize: 12,
                   color: ColorUtils.fromHex("#4B5563"),
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w600,
                 ),
-                maxLines: 2,
+                maxLines: 3,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            SizedBox(height: 5)
           ],
         ),
       ),

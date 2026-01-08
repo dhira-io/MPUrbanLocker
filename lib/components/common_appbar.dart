@@ -46,12 +46,12 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.notifications, color: Colors.black),
+          icon: const Icon(Icons.qr_code_scanner, color: Colors.black),
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => NotificationScreen()),
-            );
+            // Navigator.push(
+            //   context,
+            //   MaterialPageRoute(builder: (_) => NotificationScreen()),
+            // );
           },
         ),
         Builder(
