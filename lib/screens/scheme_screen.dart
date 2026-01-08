@@ -40,14 +40,11 @@ class _SchemeScreenState extends State<SchemeScreen> {
   // Inside _SchemeScreenState
 
   void _checkAndShowExpiryPopup(List<DocumentExpiry> documents) {
-    // Find the first document that has expiry enabled
-    // You can also loop through all, but usually, one popup is shown for the most urgent one.
-    final expiringDoc = documents.firstWhere(
-            (doc) => doc.hasExpiry == true,
-        orElse: () => DocumentExpiry(docType: '', storagePath: '', isExpired: false, hasExpiry: false, expiryDate: '')
-    );
+    // 1. Filter the list to get ALL documents with expiry enabled
+    final expiredDocs = documents.where((doc) => doc.hasExpiry == true).toList();
 
-    if (expiringDoc.docType.isNotEmpty) {
+    // 2. Only show the dialog if the list is not empty
+    if (expiredDocs.isNotEmpty) {
       showDialog(
         context: context,
         barrierDismissible: true,
@@ -66,7 +63,7 @@ class _SchemeScreenState extends State<SchemeScreen> {
                 ),
               ),
               child: Column(
-                mainAxisSize: MainAxisSize.min, // Important for Dialogs
+                mainAxisSize: MainAxisSize.min, // Dialog shrinks to fit content
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
@@ -74,7 +71,7 @@ class _SchemeScreenState extends State<SchemeScreen> {
                     children: [
                       Flexible(
                         child: Text(
-                          'Document Alert',
+                          'Document Validity Expired!',
                           style: GoogleFonts.inter(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
@@ -102,28 +99,47 @@ class _SchemeScreenState extends State<SchemeScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
-                  Text(
-                    expiringDoc.docType.replaceAll('_', ' '),
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                      color: const Color(0xFFDBEAFE),
+                  const SizedBox(height: 16),
+
+                  // 3. The List of Expired Documents
+                  Flexible(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: expiredDocs.map((doc) => Padding(
+                          padding: const EdgeInsets.only(bottom: 12.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                doc.docType.replaceAll('_', ' '),
+                                style: GoogleFonts.inter(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: const Color(0xFFDBEAFE),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                doc.expiryDate != null && doc.expiryDate!.isNotEmpty
+                                    ? 'Expires: ${doc.expiryDate}'
+                                    : 'Expiry tracking active',
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white70,
+                                ),
+                              ),
+                              const Divider(color: Colors.white10, height: 20),
+                            ],
+                          ),
+                        )).toList(),
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    expiringDoc.expiryDate != null
-                        ? 'Expires on: ${expiringDoc.expiryDate}'
-                        : 'Expiry tracking active',
-                    style: GoogleFonts.inter(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFFDBEAFE),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  // White Button
+
+                  const SizedBox(height: 8),
+
+                  // White Action Button
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
                     child: Container(
@@ -157,6 +173,7 @@ class _SchemeScreenState extends State<SchemeScreen> {
       );
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
