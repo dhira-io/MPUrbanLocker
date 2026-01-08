@@ -57,8 +57,8 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
     _pages = <Widget>[
       _buildHomePage(), // Index 0: Home/Dashboard Content
       MyDocumentsScreen(),
-      SchemeScreen(),// Index 1: Docs & Services
-      //NotificationScreen(), // Index 2: Notifications
+      //SchemeScreen(),// Index 1: Docs & Services
+      NotificationScreen(), // Index 2: Notifications
       const ProfileScreen(), // Index 3: Profile
     ];
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -212,7 +212,8 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
+              Expanded(
+              child: Text(
                 'Documents you might need',
                 style: GoogleFonts.inter(
                   fontSize: 18,
@@ -220,8 +221,8 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
                   color: ColorUtils.fromHex("#1F2937"),
                 ),
               ),
+            ),
               SizedBox(width: 5),
-/*
               GestureDetector(
                 onTap: () {
                   setState(() {
@@ -237,19 +238,18 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
                   ),
                 ),
               ),
-*/
             ],
           ),
         ),
 
         // --- LIST OR GRID BASED ON toggle ---
-        // showAllPopularDocs ?
-             _buildPopularDocsGrid(context),
-            // : _buildDocumentsList(context),
+         showAllPopularDocs ?
+             _buildPopularDocsGrid(context)
+             : _buildDocumentsList(context),
         const SizedBox(height: 20),
 
         //scheme card
-
+/*
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
@@ -336,6 +336,88 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
             ],
           ),
         ),
+*/
+                // 4. Quick Actions Grid
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(
+                  left: 16.0,
+                  right: 16.0,
+                  top: 8.0,
+                  bottom: 10.0,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                     Text(
+                      "Quick Actions",
+                      style: GoogleFonts.inter(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: ColorUtils.fromHex("#1F2937")
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        print("View All Quick Actions");
+                      },
+                      child: Text(
+                        'View All',
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          color: ColorUtils.fromHex("#613AF5"),
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // GridView for Quick Actions
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: GridView.count(
+                  crossAxisCount: 3,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  mainAxisSpacing: 10,
+                  crossAxisSpacing: 10,
+                  childAspectRatio: 0.9,
+                  // Adjust ratio for better text fit
+                  children: [
+                    _buildQuickActionTile(
+                      "Validate Certificate",
+                      Icons.qr_code,
+                      Colors.red,
+                    ),
+                    _buildQuickActionTile(
+                      "Document Drive",
+                      Icons.drive_folder_upload_rounded,
+                      Colors.blue,
+                    ),
+                    _buildQuickActionTile(
+                      "My Consents",
+                      Icons.question_mark_rounded,
+                      Colors.green,
+                    ),
+                    _buildQuickActionTile(
+                      "Activity Log",
+                      Icons.history,
+                      Colors.blueAccent,
+                    ),
+                    _buildQuickActionTile(
+                      "Support",
+                      Icons.support_agent,
+                      Colors.cyan,
+                    ),
+                    _buildQuickActionTile("More", Icons.add, Colors.amber),
+                  ],
+                ),
+              ),
+            ],
+          ),
 
         const SizedBox(height: 20),
 
@@ -447,11 +529,11 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
             BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
             BottomNavigationBarItem(
               icon: Icon(Icons.description),
-              label: 'Docs& Services',
+              label: 'Documents',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.verified),
-              label: 'Schemes',
+              icon: Icon(Icons.notifications),
+              label: 'Notifications',
             ),
             BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
           ],
@@ -558,7 +640,7 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
 
             ListTile(
               leading: Image.asset('assets/shield.png'),
-              title: const Text('validate Certificate'),
+              title: const Text('Validate Certificate'),
               trailing: Icon(Icons.arrow_forward_ios),
               onTap: () => Navigator.pop(context),
             ),
@@ -712,14 +794,11 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
       actions: [
         IconButton(
           icon: Icon(
-            Icons.notifications,
+            Icons.qr_code_scanner,
             color: ColorUtils.fromHex("#212121"),
           ),
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => NotificationScreen()),
-            );
+          
           },
         ),
         Builder(
@@ -795,7 +874,7 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
 
   // --- CAROUSEL SLIDER ---
   Widget _buildBannerPlaceholder(BuildContext context) {
-    final provider = Provider.of<OnboardingProvider>(context, listen: false);
+    final provider = Provider.of<OnboardingProvider>(context);
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Column(
@@ -808,7 +887,7 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
             viewportFraction: (screenWidth - 10) / screenWidth,
 
             autoPlay: true,
-            autoPlayInterval: Duration(seconds: 3),
+            autoPlayInterval: Duration(seconds: 5),
             autoPlayAnimationDuration: Duration(milliseconds: 800),
             autoPlayCurve: Curves.easeInOut,
 
@@ -836,6 +915,25 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
             );
           },
         ),
+        const SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(
+            AppConstants.appSlides.length,
+                (index) => Container(
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              width: provider.currentIndex == index ? 12 : 8,
+              height: provider.currentIndex == index ? 12 : 8,
+              decoration: BoxDecoration(
+                color: provider.currentIndex == index
+                    ? const Color(0xFF5C3AFF)
+                    : Colors.grey.shade300,
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+        ),
+
       ],
     );
   }
@@ -873,7 +971,7 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
           crossAxisCount: 2,
           mainAxisSpacing: 12,
           crossAxisSpacing: 12,
-          childAspectRatio: 1,
+          childAspectRatio: 1.3,
         ),
         itemBuilder: (context, index) {
           final docConfig = ConfigService.docServices[index];
@@ -1070,9 +1168,9 @@ class CategoryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(15.0),
+      borderRadius: BorderRadius.circular(10.0),
       child: Container(
-        width: 160,
+        width: 140,
         // Fixed width for horizontal scroll
         margin: const EdgeInsets.symmetric(horizontal: 4.0),
         padding: const EdgeInsets.all(12.0),
@@ -1092,7 +1190,7 @@ class CategoryCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             CircleAvatar(radius: 28, backgroundColor: bgColor, child: image),
-            const SizedBox(height: 8),
+            const SizedBox(height: 4),
             SizedBox(
               height: 42,
               child: Text(
@@ -1100,14 +1198,13 @@ class CategoryCard extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(
                   fontSize: 12,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w600,
                   color: ColorUtils.fromHex("#4B5563"),
                 ),
-                maxLines: 2,
+                maxLines: 3,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            SizedBox(height: 5),
           ],
         ),
       ),
