@@ -29,6 +29,11 @@ class AppConstants {
   static const String propertyMutationEndpoint = '/api/enagarpalika/property-mutation';
   static const String waterTaxReceiptEndpoint = '/api/enagarpalika/water-tax-receipt';
 
+  //scheme
+  static const String schemeMatchesEndpoint = '/api/users/me/scheme-matches?min_percentage=0';
+  static const String documentsExpiryEndpoint = '/api/users/me/documents-expiry';
+
+
 
 
   // User endpoints

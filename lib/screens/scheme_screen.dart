@@ -24,11 +24,11 @@ class _SchemeScreenState extends State<SchemeScreen> {
       final provider = Provider.of<SchemeProvider>(context, listen: false);
 
       // 2. Await the first call (Schemes)
-      await provider.fetchSchemes();
+      await provider.fetchSchemes(context);
 
       // 3. Await the second call (Documents)
       // This ensures provider.documents is now full of data
-      await provider.fetchDocumentsExpiry();
+      await provider.fetchDocumentsExpiry(context);
 
       // 4. Check if the widget is still in the tree before showing dialog
       if (mounted) {

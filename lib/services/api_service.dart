@@ -1,13 +1,16 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/api_response.dart';
 import '../models/document.dart';
 import '../models/session.dart';
 import '../models/user.dart';
+import '../screens/combine_dashboard.dart';
 import '../utils/constants.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
@@ -62,7 +65,6 @@ class ApiService {
 
   Future<Map<String, dynamic>> _handleResponse(http.Response response) async {
     final body = jsonDecode(response.body) as Map<String, dynamic>;
-
     print(body);
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return body;
@@ -71,19 +73,40 @@ class ApiService {
     if (response.statusCode == 401) {
       // Token expired or invalid - clear storage
       final pref = await SharedPreferences.getInstance();
-       await pref.remove(AppConstants.tokenKey);
-      await pref.remove(AppConstants.userIdKey);
+      await pref.clear();
+      showSessionExpireAlert();
       throw ApiException(
         body['error'] ?? 'Unauthorized',
         statusCode: 401,
         data: body,
       );
+
     }
 
     throw ApiException(
       body['error'] ?? body['message'] ?? 'Request failed',
       statusCode: response.statusCode,
       data: body,
+    );
+  }
+  showSessionExpireAlert(){
+    Get.dialog(
+      AlertDialog(
+        title: const Text('Session Expired'),
+        content: const Text('Your session has expired. Please login again.'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              // Close dialog
+              Get.back();
+              // Navigate to Login and clear stack
+              Get.offAll(() => CombinedDashboard(isLoggedIn: false));
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+      barrierDismissible: false, // user must tap OK
     );
   }
 
@@ -115,7 +138,7 @@ class ApiService {
 
   Future<SessionStatus> getSessionStatus(String state) async {
     String endpoint = "${AppConstants.sessionStatusEndpoint}/$state/status";
-    Map<String, dynamic> body = await _getRequest(endpoint, includeAuth: false);
+    Map<String, dynamic> body = await getRequest(endpoint, includeAuth: false);
     debugPrint('📤 session response: ${body}');
     return SessionStatus.fromJson(body);
   }
@@ -136,7 +159,7 @@ class ApiService {
   // ==================== User Profile ====================
 
   Future<User> getUserProfile(String userId) async {
-    Map<String, dynamic> response = await _getRequest(
+    Map<String, dynamic> response = await getRequest(
       "${AppConstants.userProfileEndpoint(userId)}",
       includeAuth: true,
     );
@@ -144,7 +167,7 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> getProfileInfo(String userId) async {
-    Map<String, dynamic> response = await _getRequest(
+    Map<String, dynamic> response = await getRequest(
       "${AppConstants.userProfileEndpoint(userId)}",
       includeAuth: true,
     );
@@ -265,7 +288,7 @@ class ApiService {
     }
   }
 
-  Future<Map<String, dynamic>> _getRequest(
+  Future<Map<String, dynamic>> getRequest(
     String endpoint, {
     bool includeAuth = true,
     Map<String, String>? queryParams,

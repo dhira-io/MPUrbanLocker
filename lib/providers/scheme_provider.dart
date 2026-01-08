@@ -1,10 +1,13 @@
 import 'dart:convert';
 import 'package:digilocker_flutter/models/documentExpiry_model.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/scheme_model.dart';
+import '../services/api_service.dart';
 import '../utils/constants.dart';
+import 'package:provider/provider.dart';
 
 // Import your global navigator key if defined in main.dart
 // import '../main.dart';
@@ -18,49 +21,42 @@ class SchemeProvider extends ChangeNotifier {
   String _errorMessage = "";
 
   List<SchemeMatch> get schemes => _schemes;
+
   List<DocumentExpiry> get documents => _documents; // Getter for docs
   bool get isLoading => _isLoading;
+
   String get errorMessage => _errorMessage;
 
-
   // --- API 1: Fetch Schemes ---
-  Future<void> fetchSchemes() async {
+  Future<void> fetchSchemes(BuildContext context) async {
     _isLoading = true;
-    _errorMessage = "";
+    _errorMessage = '';
     notifyListeners();
 
     try {
-      final pref = await SharedPreferences.getInstance();
-      final accessToken = await pref.getString(AppConstants.tokenKey);
-      final url = Uri.parse(
-        "https://0w5c7rsr-3001.inc1.devtunnels.ms/api/users/me/scheme-matches?min_percentage=0",
+      final apiService = context.read<ApiService>();
+
+      final Map<String, dynamic> response = await apiService.getRequest(
+        AppConstants.schemeMatchesEndpoint,
+        includeAuth: true,
       );
 
-      final response = await http.get(
-        url,
-        headers: {
-          "Authorization": "Bearer $accessToken",
-          "Content-Type": "application/json",
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> decodedData = json.decode(response.body);
+      if (response['success'] == true && response['data'] != null) {
+        final Map<String, dynamic> decodedData = response;
         final schemeResponse = SchemeResponse.fromJson(decodedData);
-
-        _allSchemes = schemeResponse.matches; // 🔹 store original
-        _schemes = _allSchemes;               // 🔹 visible list
+        _allSchemes = schemeResponse.matches; // store original
+        _schemes = _allSchemes;
+      } else {
+        _errorMessage = response['message'] ?? 'Something went wrong';
+        Fluttertoast.showToast(msg: _errorMessage);
       }
-      else if (response.statusCode == 401) {
-        _errorMessage = "Session expired. Please login again.";
-        await handleLogout();
-      }
-      else {
-        _errorMessage = "Server Error: ${response.statusCode}";
-      }
-    } catch (error) {
-      _errorMessage = "Connection error. Please check your internet.";
-      debugPrint("Fetch Error: $error");
+    } on NoInternetException catch (e) {
+      _errorMessage = e.toString();
+      Fluttertoast.showToast(msg: _errorMessage);
+    } catch (e) {
+      _errorMessage = 'Failed to load schemes';
+      debugPrint('Fetch Error: $e');
+      Fluttertoast.showToast(msg: _errorMessage);
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -90,34 +86,33 @@ class SchemeProvider extends ChangeNotifier {
   }
 
   // --- API 2: Fetch Document Expiry ---
-  Future<void> fetchDocumentsExpiry() async {
+  Future<void> fetchDocumentsExpiry(BuildContext context) async {
     _isLoading = true;
     notifyListeners();
 
     try {
-      final pref = await SharedPreferences.getInstance();
-      final accessToken = await pref.getString(AppConstants.tokenKey);
-      final url = Uri.parse("https://0w5c7rsr-3001.inc1.devtunnels.ms/api/users/me/documents-expiry");
+      final apiService = context.read<ApiService>();
 
-      final response = await http.get(
-        url,
-        headers: {
-          "Authorization": "Bearer $accessToken",
-          "Content-Type": "application/json",
-        },
+      final Map<String, dynamic> response = await apiService.getRequest(
+        AppConstants.documentsExpiryEndpoint,
+        includeAuth: true,
       );
-
-      print("expiry doc =${response.statusCode}\nresp =${response.body}");
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> decodedData = json.decode(response.body);
-        final List<dynamic> docList = decodedData['data'] ?? [];
-
-        _documents = docList.map((item) => DocumentExpiry.fromJson(item)).toList();
-      } else if (response.statusCode == 401) {
-        await handleLogout();
+      if (response['success'] == true && response['data'] != null) {
+        final List<dynamic> docList = response['data'] ?? [];
+        _documents = docList
+            .map((item) => DocumentExpiry.fromJson(item))
+            .toList();
+      } else {
+        _errorMessage = response['message'] ?? 'Something went wrong';
+        Fluttertoast.showToast(msg: _errorMessage);
       }
-    } catch (error) {
-      debugPrint("Fetch Documents Error: $error");
+    } on NoInternetException catch (e) {
+      _errorMessage = e.toString();
+      Fluttertoast.showToast(msg: _errorMessage);
+    } catch (e) {
+      _errorMessage = 'Failed to Fetch Documents';
+      debugPrint('Fetch Documents Error: $e');
+      Fluttertoast.showToast(msg: _errorMessage);
     } finally {
       _isLoading = false;
       notifyListeners();

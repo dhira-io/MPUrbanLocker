@@ -10,6 +10,7 @@ import 'package:digilocker_flutter/services/LocalNotificationServices.dart';
 import 'package:digilocker_flutter/services/api_service.dart';
 import 'package:digilocker_flutter/services/config_service.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'providers/splash_provider.dart';
 import 'providers/language_provider.dart';
@@ -22,7 +23,12 @@ Future<void> main() async {
   await LocalNotificationService.init();
   await ConfigService.loadConfig();
 
-  runApp(const MyApp());
+  runApp(
+    GetMaterialApp(
+      debugShowCheckedModeBanner: false,
+      home:const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

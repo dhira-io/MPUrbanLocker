@@ -57,6 +57,7 @@ dependencies:
   connectivity_plus:
   flutter_local_notifications:
   open_filex:
+  get: ^4.6.6
 
 dev_dependencies:
   flutter_test:
