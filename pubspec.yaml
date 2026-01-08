@@ -48,7 +48,7 @@ dependencies:
   pdfx: ^2.5.0 # Or the latest version
   flutter_pdfview:
   fluttertoast:
-  flutter_secure_storage:
+#  flutter_secure_storage:
   cloud_firestore:
   firebase_core: ^4.3.0
   package_info_plus:

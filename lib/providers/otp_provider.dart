@@ -2,8 +2,7 @@
 import 'dart:async';
 import 'package:digilocker_flutter/screens/set_pin_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import '../screens/combine_dashboard.dart';
 import '../services/api_service.dart';
 import '../utils/constants.dart';
@@ -70,14 +69,9 @@ class OTPProvider with ChangeNotifier {
         print(response["data"]);
         String userId = response["data"]["userId"];
         String token = response["data"]["token"];
-        await FlutterSecureStorage().write(
-          key: AppConstants.tokenKey,
-          value: token,
-        );
-        await FlutterSecureStorage().write(
-          key: AppConstants.userIdKey,
-          value: userId,
-        );
+      final pref = await SharedPreferences.getInstance();
+       pref.setString(AppConstants.tokenKey, token);
+       pref.setString(AppConstants.userIdKey, userId);
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(

@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/document.dart';
 import '../providers/auth_provider.dart';
 import '../providers/onboarding_provider.dart'; // Used for Carousel index
@@ -18,7 +19,6 @@ import '../utils/constants.dart';
 import 'AboutMpUrbanLockerScreen.dart';
 import 'CreateDocumentForm.dart';
 import 'DocumentPreview.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'FAQScreen.dart';
 import 'NotificationScreen.dart';
 import 'PrivacyPolicyScreen.dart';
@@ -103,12 +103,9 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
   Future<void> getDocuments() async {
     List<Document> loadedDocs = [];
     try {
-      final accessToken = await FlutterSecureStorage().read(
-        key: AppConstants.tokenKey,
-      );
-      final userId = await FlutterSecureStorage().read(
-        key: AppConstants.userIdKey,
-      );
+      final pref = await SharedPreferences.getInstance();
+      final accessToken = await pref.getString(AppConstants.tokenKey);
+      final userId = await pref.getString(AppConstants.userIdKey);
 
       // Only fetch documents if the user is logged in
       if (accessToken != null && userId != null && accessToken.isNotEmpty) {

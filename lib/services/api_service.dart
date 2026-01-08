@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/api_response.dart';
 import '../models/document.dart';
 import '../models/session.dart';
@@ -24,19 +24,24 @@ class ApiException implements Exception {
 
 class ApiService {
   final String baseUrl;
-  final FlutterSecureStorage _secureStorage;
+  // final FlutterSecureStorage _secureStorage;
   final http.Client _client;
 
   ApiService({
     String? baseUrl,
-    FlutterSecureStorage? secureStorage,
+    // FlutterSecureStorage? secureStorage,
     http.Client? client,
   }) : baseUrl = baseUrl ?? AppConstants.baseUrl,
-       _secureStorage = secureStorage ?? const FlutterSecureStorage(),
+       // _secureStorage = secureStorage ?? const FlutterSecureStorage(),
        _client = client ?? http.Client();
 
-  Future<String?> get token async =>
-      await _secureStorage.read(key: AppConstants.tokenKey);
+  getauthToken()async{
+    final pref = await SharedPreferences.getInstance();
+    return await pref.getString(AppConstants.tokenKey) ?? '';
+
+  }
+  // Future<String?> get token async =>
+  //     await _secureStorage.read(key: AppConstants.tokenKey);
 
   Future<Map<String, String>> _getHeaders({bool includeAuth = true}) async {
     final headers = <String, String>{
@@ -45,7 +50,8 @@ class ApiService {
     };
 
     if (includeAuth) {
-      final authToken = await token;
+      final pref = await SharedPreferences.getInstance();
+      final authToken =  await pref.getString(AppConstants.tokenKey);
       if (authToken != null) {
         headers['Authorization'] = 'Bearer $authToken';
       }
@@ -64,8 +70,9 @@ class ApiService {
 
     if (response.statusCode == 401) {
       // Token expired or invalid - clear storage
-      await _secureStorage.delete(key: AppConstants.tokenKey);
-      await _secureStorage.delete(key: AppConstants.userIdKey);
+      final pref = await SharedPreferences.getInstance();
+       await pref.remove(AppConstants.tokenKey);
+      await pref.remove(AppConstants.userIdKey);
       throw ApiException(
         body['error'] ?? 'Unauthorized',
         statusCode: 401,
@@ -171,28 +178,29 @@ class ApiService {
     required String userId,
     User? user,
   }) async {
-    await _secureStorage.write(key: AppConstants.tokenKey, value: token);
-    await _secureStorage.write(key: AppConstants.userIdKey, value: userId);
+    final pref = await SharedPreferences.getInstance();
+    await pref.setString(AppConstants.tokenKey, token);
+    await pref.setString(AppConstants.userIdKey, userId);
     if (user != null) {
-      await _secureStorage.write(
-        key: AppConstants.userKey,
-        value: jsonEncode(user.toJson()),
-      );
+      await pref.setString(AppConstants.userKey, jsonEncode(user.toJson()));
     }
   }
 
   Future<void> clearCredentials() async {
-    await _secureStorage.delete(key: AppConstants.tokenKey);
-    await _secureStorage.delete(key: AppConstants.userIdKey);
-    await _secureStorage.delete(key: AppConstants.userKey);
+    final pref = await SharedPreferences.getInstance();
+    await pref.remove(AppConstants.tokenKey);
+    await pref.remove(AppConstants.userIdKey);
+    await pref.remove(AppConstants.userKey);
   }
 
   Future<String?> getSavedUserId() async {
-    return await _secureStorage.read(key: AppConstants.userIdKey);
+    final pref = await SharedPreferences.getInstance();
+    return await pref.getString(AppConstants.userIdKey);
   }
 
   Future<User?> getSavedUser() async {
-    final userJson = await _secureStorage.read(key: AppConstants.userKey);
+    final pref = await SharedPreferences.getInstance();
+    final userJson = await pref.getString(AppConstants.userKey);
     if (userJson == null) return null;
     try {
       return User.fromJson(jsonDecode(userJson) as Map<String, dynamic>);
@@ -202,24 +210,22 @@ class ApiService {
   }
 
   Future<void> savePKCEParams(String state, String verifier) async {
-    await _secureStorage.write(key: AppConstants.pkceStateKey, value: state);
-    await _secureStorage.write(
-      key: AppConstants.pkceVerifierKey,
-      value: verifier,
-    );
+    final pref = await SharedPreferences.getInstance();
+    await pref.setString(AppConstants.pkceStateKey, state);
+    await pref.setString(AppConstants.pkceVerifierKey, verifier);
   }
 
   Future<({String? state, String? verifier})> getPKCEParams() async {
-    final state = await _secureStorage.read(key: AppConstants.pkceStateKey);
-    final verifier = await _secureStorage.read(
-      key: AppConstants.pkceVerifierKey,
-    );
+    final pref = await SharedPreferences.getInstance();
+    final state = await pref.getString(AppConstants.pkceStateKey);
+    final verifier = await pref.getString(AppConstants.pkceVerifierKey);
     return (state: state, verifier: verifier);
   }
 
   Future<void> clearPKCEParams() async {
-    await _secureStorage.delete(key: AppConstants.pkceStateKey);
-    await _secureStorage.delete(key: AppConstants.pkceVerifierKey);
+    final pref = await SharedPreferences.getInstance();
+   await pref.remove(AppConstants.pkceStateKey);
+    await pref.remove(AppConstants.pkceVerifierKey);
   }
 
   void dispose() {

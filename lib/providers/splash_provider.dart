@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -75,7 +74,8 @@ class SplashProvider with ChangeNotifier {
   }
 
   Future<void> _checkLoginStatus() async {
-    final token = await FlutterSecureStorage().read(key: AppConstants.tokenKey);
+    final pref = await SharedPreferences.getInstance();
+    final token = await pref.getString(AppConstants.tokenKey);
     print("here is token ${token}");
     // Check for an 'authToken' to determine login state
     _isLoggedIn = token != null && token.isNotEmpty;

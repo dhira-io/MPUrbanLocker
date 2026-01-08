@@ -4,11 +4,11 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../components/common_appbar.dart';
 import '../services/LocalNotificationServices.dart';
@@ -33,8 +33,6 @@ class DocumentPreview extends StatefulWidget {
 }
 
 class _DocumentPreviewState extends State<DocumentPreview> {
-  static const _storage = FlutterSecureStorage();
-
   String? localPdfPath;
   Uint8List? bytesOfDoc;
 
@@ -48,10 +46,9 @@ class _DocumentPreviewState extends State<DocumentPreview> {
 
   /// 📄 Fetch PDF from API
   Future<void> _viewDocument() async {
-    final accessToken =
-        await _storage.read(key: AppConstants.tokenKey) ?? '';
-    final userId =
-        await _storage.read(key: AppConstants.userIdKey) ?? '';
+    final pref = await SharedPreferences.getInstance();
+    final accessToken = await pref.getString(AppConstants.tokenKey) ?? '';
+    final userId = await pref.getString(AppConstants.userIdKey) ?? '';
 
     final response = await http.get(
       Uri.parse(
@@ -127,8 +124,8 @@ class _DocumentPreviewState extends State<DocumentPreview> {
 
   void _downloadPdf() async {
     try {
-      final userId =
-          await _storage.read(key: AppConstants.userIdKey) ?? '';
+      final pref = await SharedPreferences.getInstance();
+      final userId = await pref.getString(AppConstants.userIdKey) ?? '';
       final fileName =
       '${widget.title}_$userId'.replaceAll('/', '');
 

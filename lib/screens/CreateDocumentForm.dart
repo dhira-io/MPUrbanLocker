@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../components/common_appbar.dart';
 import '../models/doc_service_config.dart';
 import '../services/api_service.dart';
@@ -466,9 +466,9 @@ class _CreateDocumentFormState extends State<CreateDocumentForm> {
     setState(() => isLoading = true);
 
     //try {
-    final accessToken =
-        await FlutterSecureStorage().read(key: AppConstants.tokenKey) ?? "";
 
+    final pref = await SharedPreferences.getInstance();
+    final accessToken = await pref.getString(AppConstants.tokenKey) ?? "";
     // Check serviceType in config ("custom" for Trade License, otherwise digilocker)
     if (serviceConfig!.serviceType == "custom") {
       await _callCustomServiceApi(accessToken);

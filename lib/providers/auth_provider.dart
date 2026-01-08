@@ -71,7 +71,7 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final savedToken = await _apiService.token;
+      final savedToken = await _apiService.getauthToken();
       final savedUserId = await _apiService.getSavedUserId();
       final savedUser = await _apiService.getSavedUser();
 

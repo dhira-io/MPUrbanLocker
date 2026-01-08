@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:digilocker_flutter/models/documentExpiry_model.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/scheme_model.dart';
 import '../utils/constants.dart';
 
@@ -22,7 +22,6 @@ class SchemeProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String get errorMessage => _errorMessage;
 
-  final _storage = const FlutterSecureStorage();
 
   // --- API 1: Fetch Schemes ---
   Future<void> fetchSchemes() async {
@@ -31,7 +30,8 @@ class SchemeProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final accessToken = await _storage.read(key: AppConstants.tokenKey);
+      final pref = await SharedPreferences.getInstance();
+      final accessToken = await pref.getString(AppConstants.tokenKey);
       final url = Uri.parse(
         "https://0w5c7rsr-3001.inc1.devtunnels.ms/api/users/me/scheme-matches?min_percentage=0",
       );
@@ -95,7 +95,8 @@ class SchemeProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final accessToken = await _storage.read(key: AppConstants.tokenKey);
+      final pref = await SharedPreferences.getInstance();
+      final accessToken = await pref.getString(AppConstants.tokenKey);
       final url = Uri.parse("https://0w5c7rsr-3001.inc1.devtunnels.ms/api/users/me/documents-expiry");
 
       final response = await http.get(
@@ -124,7 +125,8 @@ class SchemeProvider extends ChangeNotifier {
   }
 
   Future<void> handleLogout() async {
-    await _storage.deleteAll();
+    final pref = await SharedPreferences.getInstance();
+    pref.clear();
     _schemes = [];
     _allSchemes = [];
     _documents = [];

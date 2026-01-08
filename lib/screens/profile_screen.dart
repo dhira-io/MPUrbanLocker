@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:digilocker_flutter/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as _client;
@@ -38,8 +37,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     getUserProfile();
   }
   getUserProfile() async {
-    final storedUserId =
-        await FlutterSecureStorage().read(key: AppConstants.userIdKey) ?? "";
+    final pref = await SharedPreferences.getInstance();
+    final storedUserId = await pref.getString(AppConstants.userIdKey) ?? '';
     final apiService = context.read<ApiService>();
     try {
       Map<String, dynamic> response = await apiService.getProfileInfo(
