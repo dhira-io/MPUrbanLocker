@@ -29,19 +29,17 @@ class AppConstants {
   static const String propertyMutationEndpoint = '/api/enagarpalika/property-mutation';
   static const String waterTaxReceiptEndpoint = '/api/enagarpalika/water-tax-receipt';
 
-  //scheme
+  //scheme documents
   static const String schemeMatchesEndpoint = '/api/users/me/scheme-matches?min_percentage=0';
   static const String documentsExpiryEndpoint = '/api/users/me/documents-expiry';
   static const String documentsFetchByDocIDEndpoint = '/api/users/me/documents/fetch';
-
+  static const String userDocumentsEndpoint = '/api/users/me/documents';
 
 
 
   // User endpoints
-  static String userProfileEndpoint(String userId) =>
-      '/api/users/$userId/profile';
-  static String userDocumentsEndpoint(String userId) =>
-      '/api/users/$userId/documents';
+  static const String userProfileEndpoint = '/api/users/me/profile';
+
   static String documentFileEndpoint(String userId, String docId) =>
       '/api/users/$userId/documents/$docId/file';
 

@@ -1,4 +1,4 @@
-import 'package:digilocker_flutter/screens/shared_documents_screen.dart';
+import 'package:digilocker_flutter/screens/shared_doc_list_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -23,11 +23,24 @@ enum PermissionOption { viewOnly, viewAndDownload }
 class _ShareScreenState extends State<ShareScreen> {
   int _currentStep = 0;
   bool _isFlowComplete = false;
+
   ShareOption? _selectedOption;
   ProtectionOption? _selectedProtectionOption;
   DurationOption? _selectedDurationOption;
   PermissionOption? _selectedPermissionOption;
+
   final TextEditingController _shareWithController = TextEditingController();
+
+  // NEW: fields to hold custom range selection
+  DateTimeRange? _customDateRange;
+
+  @override
+  void initState() {
+    super.initState();
+    _shareWithController.addListener(() {
+      setState(() {});
+    });
+  }
 
   @override
   void dispose() {
@@ -75,11 +88,14 @@ class _ShareScreenState extends State<ShareScreen> {
               }
             },
           ),
-          Text(
-            widget.documentTitle,
-            style: GoogleFonts.inter(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
+          Expanded(
+            child: Text(
+              widget.documentTitle,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.inter(
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],
@@ -105,7 +121,6 @@ class _ShareScreenState extends State<ShareScreen> {
   Widget _buildStep({required int index, required String label}) {
     bool isCompleted = index < _currentStep;
     bool isActive = index == _currentStep;
-
     return Column(
       children: [
         SizedBox(
@@ -117,13 +132,14 @@ class _ShareScreenState extends State<ShareScreen> {
               shape: BoxShape.circle,
               color: ColorUtils.fromHex("#1DBF73"),
             ),
-            child: const Icon(Icons.check, color: Colors.white, size: 16),
+            child: const Icon(Icons.check,
+                color: Colors.white, size: 16),
           )
               : isActive
               ? CircularProgressIndicator(
             value: 0.75,
             strokeWidth: 2,
-            valueColor: AlwaysStoppedAnimation<Color>(
+            valueColor: AlwaysStoppedAnimation(
                 ColorUtils.fromHex("#1DBF73")),
             backgroundColor: Colors.grey.shade300,
           )
@@ -156,6 +172,7 @@ class _ShareScreenState extends State<ShareScreen> {
     if (_isFlowComplete) {
       return _buildSummaryStep();
     }
+
     switch (_currentStep) {
       case 0:
         return _buildGenerateStep();
@@ -166,24 +183,27 @@ class _ShareScreenState extends State<ShareScreen> {
       case 3:
         return _buildPermissionsStep();
       default:
-        return Container(); // Fallback
+        return Container();
     }
   }
 
+  // ---------- STEP 0 ----------
   Widget _buildGenerateStep() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Share Document',
-            style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600),
+            style:
+            GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           Text(
             'Choose how you want to share this document securely.',
-            style: GoogleFonts.inter(fontSize: 14, color: Colors.grey.shade600),
+            style: GoogleFonts.inter(
+                fontSize: 14, color: Colors.grey.shade600),
           ),
           const SizedBox(height: 32),
           _buildShareOptionCard(
@@ -205,20 +225,23 @@ class _ShareScreenState extends State<ShareScreen> {
     );
   }
 
+  // ---------- STEP 1 ----------
   Widget _buildProtectionStep() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Set Access Protection',
-            style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600),
+            style:
+            GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           Text(
             'Choose how the recipient should access this document.',
-            style: GoogleFonts.inter(fontSize: 14, color: Colors.grey.shade600),
+            style: GoogleFonts.inter(
+                fontSize: 14, color: Colors.grey.shade600),
           ),
           const SizedBox(height: 32),
           _buildProtectionOptionCard(
@@ -231,31 +254,46 @@ class _ShareScreenState extends State<ShareScreen> {
           _buildProtectionOptionCard(
             icon: Icons.lock_open_outlined,
             title: 'Without OTP',
-            subtitle: 'Anyone with the link or QR can access the document.',
+            subtitle:
+            'Anyone with the link or QR can access the document.',
             option: ProtectionOption.withoutOtp,
           ),
           const SizedBox(height: 24),
           _buildInfoBox(
-              icon: Icons.shield_outlined, text: 'You can change or revoke access anytime.'),
+            icon: Icons.shield_outlined,
+            text: 'You can change or revoke access anytime.',
+          ),
         ],
       ),
     );
   }
 
+  // ---------- STEP 2 (UPDATED) ----------
   Widget _buildDurationStep() {
+    final String customLabel;
+    if (_customDateRange != null) {
+      final from = DateFormat('d MMM').format(_customDateRange!.start);
+      final to = DateFormat('d MMM').format(_customDateRange!.end);
+      customLabel = 'Custom ($from - $to)';
+    } else {
+      customLabel = 'Custom';
+    }
+
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Set Access Duration',
-            style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600),
+            style:
+            GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           Text(
             'Choose how long this document should remain accessible.',
-            style: GoogleFonts.inter(fontSize: 14, color: Colors.grey.shade600),
+            style: GoogleFonts.inter(
+                fontSize: 14, color: Colors.grey.shade600),
           ),
           const SizedBox(height: 32),
           Container(
@@ -284,10 +322,12 @@ class _ShareScreenState extends State<ShareScreen> {
                   children: [
                     _buildDurationButton(
                         '15 minutes', DurationOption.fifteenMin),
-                    _buildDurationButton('1 hour', DurationOption.oneHour),
+                    _buildDurationButton(
+                        '1 hour', DurationOption.oneHour),
                     _buildDurationButton(
                         '24 hours', DurationOption.twentyFourHours),
-                    _buildDurationButton('Custom', DurationOption.custom),
+                    // Custom button now opens date range picker
+                    _buildCustomDurationButton(customLabel),
                   ],
                 ),
               ],
@@ -295,29 +335,33 @@ class _ShareScreenState extends State<ShareScreen> {
           ),
           const SizedBox(height: 24),
           _buildInfoBox(
-              icon: Icons.info_outline,
-              text:
-              'After expiry, the document cannot be accessed by anyone using the shared link or QR code.',
-              isBlue: true),
+            icon: Icons.info_outline,
+            text:
+            'After expiry, the document cannot be accessed by anyone using the shared link or QR code.',
+            isBlue: true,
+          ),
         ],
       ),
     );
   }
 
+  // ---------- STEP 3 ----------
   Widget _buildPermissionsStep() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Set Access Permissions',
-            style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600),
+            style:
+            GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           Text(
             'Choose what the recipient is allowed to do.',
-            style: GoogleFonts.inter(fontSize: 14, color: Colors.grey.shade600),
+            style: GoogleFonts.inter(
+                fontSize: 14, color: Colors.grey.shade600),
           ),
           const SizedBox(height: 32),
           _buildPermissionOptionCard(
@@ -335,17 +379,20 @@ class _ShareScreenState extends State<ShareScreen> {
           ),
           const SizedBox(height: 24),
           _buildInfoBox(
-              icon: Icons.shield_outlined,
-              text:
-              'Downloaded files are encrypted and watermarked for security.'),
+            icon: Icons.shield_outlined,
+            text:
+            'Downloaded files are encrypted and watermarked for security.',
+          ),
         ],
       ),
     );
   }
 
+  // ---------- SUMMARY STEP ----------
   Widget _buildSummaryStep() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+      padding:
+      const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -379,7 +426,6 @@ class _ShareScreenState extends State<ShareScreen> {
     );
   }
 
-  // ========= Helper for ShareOption Step =========
   Widget _buildShareOptionCard({
     required IconData icon,
     required String title,
@@ -407,18 +453,23 @@ class _ShareScreenState extends State<ShareScreen> {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: ColorUtils.fromHex("#EEF2FF"),
-                borderRadius: BorderRadius.circular(12),
+                shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: ColorUtils.fromHex("#5A48F5"), size: 24),
+              child: Icon(icon,
+                  color: ColorUtils.fromHex("#5A48F5"), size: 24),
             ),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600)),
+                  Text(title,
+                      style: GoogleFonts.inter(
+                          fontSize: 16, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 4),
-                  Text(subtitle, style: GoogleFonts.inter(fontSize: 12, color: Colors.grey.shade600)),
+                  Text(subtitle,
+                      style: GoogleFonts.inter(
+                          fontSize: 12, color: Colors.grey.shade600)),
                 ],
               ),
             ),
@@ -428,7 +479,6 @@ class _ShareScreenState extends State<ShareScreen> {
     );
   }
 
-  // ========= Helper for Protection Step =========
   Widget _buildProtectionOptionCard({
     required IconData icon,
     required String title,
@@ -453,20 +503,26 @@ class _ShareScreenState extends State<ShareScreen> {
         child: Row(
           children: [
             Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: ColorUtils.fromHex("#EEF2FF"),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(icon, color: ColorUtils.fromHex("#5A48F5"), size: 24)),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: ColorUtils.fromHex("#EEF2FF"),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon,
+                  color: ColorUtils.fromHex("#5A48F5"), size: 24),
+            ),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600)),
+                  Text(title,
+                      style: GoogleFonts.inter(
+                          fontSize: 16, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 4),
-                  Text(subtitle, style: GoogleFonts.inter(fontSize: 12, color: Colors.grey.shade600)),
+                  Text(subtitle,
+                      style: GoogleFonts.inter(
+                          fontSize: 12, color: Colors.grey.shade600)),
                 ],
               ),
             ),
@@ -476,11 +532,19 @@ class _ShareScreenState extends State<ShareScreen> {
     );
   }
 
-  // ========= Helper for Duration Step =========
+  // ---------- DURATION BUTTONS ----------
   Widget _buildDurationButton(String label, DurationOption option) {
     bool isSelected = _selectedDurationOption == option;
     return ElevatedButton(
-      onPressed: () => setState(() => _selectedDurationOption = option),
+      onPressed: () {
+        setState(() {
+          _selectedDurationOption = option;
+          // Reset custom range when fixed duration is chosen
+          if (option != DurationOption.custom) {
+            _customDateRange = null;
+          }
+        });
+      },
       style: ElevatedButton.styleFrom(
         backgroundColor:
         isSelected ? ColorUtils.fromHex("#EEF2FF") : Colors.grey.shade100,
@@ -501,7 +565,66 @@ class _ShareScreenState extends State<ShareScreen> {
     );
   }
 
-  // ========= Helper for Permission Step =========
+  // NEW: custom duration button with date-range picker limited to 7 days
+  Widget _buildCustomDurationButton(String label) {
+    bool isSelected = _selectedDurationOption == DurationOption.custom;
+
+    return ElevatedButton(
+      onPressed: () async {
+        final now = DateTime.now();
+        final initialStart = _customDateRange?.start ?? now;
+        final initialEnd =
+            _customDateRange?.end ?? now.add(const Duration(days: 1));
+
+        final picked = await showDateRangePicker(
+          context: context,
+          firstDate: now,
+          lastDate: now.add(const Duration(days: 7)),
+          initialDateRange: DateTimeRange(
+            start: initialStart,
+            end: initialEnd.isAfter(now.add(const Duration(days: 7)))
+                ? now.add(const Duration(days: 7))
+                : initialEnd,
+          ),
+          helpText: 'Select validity (max 7 days)',
+        );
+
+        if (picked != null) {
+          // Enforce maximum 7-day range
+          final maxEnd = picked.start.add(const Duration(days: 7));
+          final correctedEnd =
+          picked.end.isAfter(maxEnd) ? maxEnd : picked.end;
+
+          setState(() {
+            _selectedDurationOption = DurationOption.custom;
+            _customDateRange = DateTimeRange(
+              start: picked.start,
+              end: correctedEnd,
+            );
+          });
+        }
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor:
+        isSelected ? ColorUtils.fromHex("#EEF2FF") : Colors.grey.shade100,
+        foregroundColor:
+        isSelected ? ColorUtils.fromHex("#4F46E5") : Colors.black,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+          side: BorderSide(
+            color: isSelected
+                ? ColorUtils.fromHex("#5A48F5")
+                : Colors.grey.shade300,
+            width: isSelected ? 1.5 : 1,
+          ),
+        ),
+      ),
+      child: Text(label),
+    );
+  }
+
+  // ---------- PERMISSION BUTTON ----------
   Widget _buildPermissionOptionCard({
     required IconData icon,
     required String title,
@@ -529,18 +652,23 @@ class _ShareScreenState extends State<ShareScreen> {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: ColorUtils.fromHex("#EEF2FF"),
-                borderRadius: BorderRadius.circular(12),
+                shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: ColorUtils.fromHex("#5A48F5"), size: 24),
+              child: Icon(icon,
+                  color: ColorUtils.fromHex("#5A48F5"), size: 24),
             ),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600)),
+                  Text(title,
+                      style: GoogleFonts.inter(
+                          fontSize: 16, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 4),
-                  Text(subtitle, style: GoogleFonts.inter(fontSize: 12, color: Colors.grey.shade600)),
+                  Text(subtitle,
+                      style: GoogleFonts.inter(
+                          fontSize: 12, color: Colors.grey.shade600)),
                 ],
               ),
             ),
@@ -550,8 +678,19 @@ class _ShareScreenState extends State<ShareScreen> {
     );
   }
 
-  // ========= Helpers for Summary Step =========
+  // ---------- SUMMARY HELPERS ----------
   Widget _buildSharingSummaryCard() {
+    String expiresOn;
+    if (_selectedDurationOption == DurationOption.custom &&
+        _customDateRange != null) {
+      expiresOn =
+          DateFormat('d MMM yyyy, hh:mm a').format(_customDateRange!.end);
+    } else {
+      // fallback: fixed expiration (your existing logic or a default)
+      expiresOn = DateFormat('d MMM yyyy, hh:mm a')
+          .format(DateTime.now().add(const Duration(days: 2)));
+    }
+
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
@@ -562,14 +701,21 @@ class _ShareScreenState extends State<ShareScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Sharing Summary', style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600)),
+          Text('Sharing Summary',
+              style: GoogleFonts.inter(
+                  fontSize: 16, fontWeight: FontWeight.w600)),
           const SizedBox(height: 16),
           _buildSummaryRow('Document', '${widget.documentTitle}.pdf'),
-          _buildSummaryRow('Method', _getShareOptionString(_selectedOption), icon: Icons.link),
-          _buildSummaryRow('Protection', _getProtectionOptionString(_selectedProtectionOption), icon: Icons.lock_outline),
-          _buildSummaryRow('Permission', _getPermissionOptionString(_selectedPermissionOption)),
+          _buildSummaryRow('Method', _getShareOptionString(_selectedOption),
+              icon: Icons.link),
+          _buildSummaryRow(
+              'Protection',
+              _getProtectionOptionString(_selectedProtectionOption),
+              icon: Icons.lock_outline),
+          _buildSummaryRow(
+              'Permission', _getPermissionOptionString(_selectedPermissionOption)),
           const Divider(height: 24),
-          _buildSummaryRow('Expires On', DateFormat('d MMM yyyy, hh:mm a').format(DateTime.now().add(const Duration(days: 365*2)))),
+          _buildSummaryRow('Expires On', expiresOn),
         ],
       ),
     );
@@ -581,14 +727,18 @@ class _ShareScreenState extends State<ShareScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: GoogleFonts.inter(fontSize: 14, color: Colors.grey.shade600)),
+          Text(label,
+              style: GoogleFonts.inter(
+                  fontSize: 14, color: Colors.grey.shade600)),
           Row(
             children: [
               if (icon != null) ...[
                 Icon(icon, size: 16, color: Colors.grey.shade600),
                 const SizedBox(width: 8),
               ],
-              Text(value, style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600)),
+              Text(value,
+                  style: GoogleFonts.inter(
+                      fontSize: 14, fontWeight: FontWeight.w600)),
             ],
           ),
         ],
@@ -600,7 +750,9 @@ class _ShareScreenState extends State<ShareScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Share Document With', style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600)),
+        Text('Share Document With',
+            style: GoogleFonts.inter(
+                fontSize: 16, fontWeight: FontWeight.w600)),
         const SizedBox(height: 12),
         TextField(
           controller: _shareWithController,
@@ -620,7 +772,8 @@ class _ShareScreenState extends State<ShareScreen> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: ColorUtils.fromHex("#5A48F5")),
+              borderSide:
+              BorderSide(color: ColorUtils.fromHex("#5A48F5")),
             ),
             counterText: '',
           ),
@@ -628,13 +781,17 @@ class _ShareScreenState extends State<ShareScreen> {
         const SizedBox(height: 8),
         Align(
           alignment: Alignment.centerRight,
-          child: Text('0/50', style: GoogleFonts.inter(fontSize: 12, color: Colors.grey.shade500)),
-        )
+          child: Text(
+            '${_shareWithController.text.length}/50',
+            style: GoogleFonts.inter(
+                fontSize: 12, color: Colors.grey.shade500),
+          ),
+        ),
       ],
     );
   }
 
-  // ========= Enum to String Helpers =========
+  // ---------- ENUM STRING HELPERS ----------
   String _getShareOptionString(ShareOption? option) {
     return option == ShareOption.link ? 'Secure Link' : 'QR Code';
   }
@@ -644,15 +801,23 @@ class _ShareScreenState extends State<ShareScreen> {
   }
 
   String _getPermissionOptionString(PermissionOption? option) {
-    return option == PermissionOption.viewAndDownload ? 'View & Download' : 'View Only';
+    return option == PermissionOption.viewAndDownload
+        ? 'View & Download'
+        : 'View Only';
   }
 
-  // ========= Common Widgets =========
-  Widget _buildInfoBox({required IconData icon, required String text, bool isBlue = false}) {
-    final Color bgColor = isBlue ? ColorUtils.fromHex("#EFF6FF") : ColorUtils.fromHex("#EEF2FF");
-    final Color iconColor = isBlue ? ColorUtils.fromHex("#3B82F6") : ColorUtils.fromHex("#5A48F5");
-    final Color textColor = isBlue ? ColorUtils.fromHex("#1E40AF") : ColorUtils.fromHex("#4F46E5");
-
+  // ---------- COMMON WIDGETS ----------
+  Widget _buildInfoBox(
+      {required IconData icon,
+        required String text,
+        bool isBlue = false}) {
+    final Color bgColor = isBlue
+        ? ColorUtils.fromHex("#EFF6FF")
+        : ColorUtils.fromHex("#EEF2FF");
+    final Color iconColor =
+    isBlue ? ColorUtils.fromHex("#3B82F6") : ColorUtils.fromHex("#5A48F5");
+    final Color textColor =
+    isBlue ? ColorUtils.fromHex("#1E40AF") : ColorUtils.fromHex("#4F46E5");
     return Container(
       padding: const EdgeInsets.all(12.0),
       decoration: BoxDecoration(
@@ -666,7 +831,10 @@ class _ShareScreenState extends State<ShareScreen> {
           Expanded(
             child: Text(
               text,
-              style: GoogleFonts.inter(fontSize: 14, color: textColor, fontWeight: FontWeight.w500),
+              style: GoogleFonts.inter(
+                  fontSize: 14,
+                  color: textColor,
+                  fontWeight: FontWeight.w500),
             ),
           ),
         ],
@@ -681,29 +849,39 @@ class _ShareScreenState extends State<ShareScreen> {
         child: SizedBox(
           width: double.infinity,
           child: ElevatedButton(
-            onPressed: () {
+            onPressed: _shareWithController.text.isNotEmpty
+                ? () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const SharedDocumentsScreen(),
+                  builder: (context) =>  SharedDocListScreen(),
                 ),
               );
-            },
+            }
+                : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: ColorUtils.fromHex("#5A48F5"),
+              disabledBackgroundColor:
+              ColorUtils.fromHex("#5A48F5").withOpacity(0.5),
               padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
             ),
-            child: Text('Share Document', style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
+            child: Text('Share Document',
+                style: GoogleFonts.inter(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white)),
           ),
         ),
       );
     }
 
-    bool canContinue = (_currentStep == 0 && _selectedOption != null) ||
-        (_currentStep == 1 && _selectedProtectionOption != null) ||
-        (_currentStep == 2 && _selectedDurationOption != null) ||
-        (_currentStep == 3 && _selectedPermissionOption != null);
+    bool canContinue =
+        (_currentStep == 0 && _selectedOption != null) ||
+            (_currentStep == 1 && _selectedProtectionOption != null) ||
+            (_currentStep == 2 && _selectedDurationOption != null) ||
+            (_currentStep == 3 && _selectedPermissionOption != null);
 
     return Padding(
       padding: const EdgeInsets.all(24.0),
@@ -722,12 +900,18 @@ class _ShareScreenState extends State<ShareScreen> {
           }
               : null,
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color.fromRGBO(160, 148, 245, 1),
-            disabledBackgroundColor: const Color.fromRGBO(160, 148, 245, 0.5),
+            backgroundColor: ColorUtils.fromHex("#5A48F5"),
+            disabledBackgroundColor:
+            const Color.fromRGBO(160, 148, 245, 0.5),
             padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12)),
           ),
-          child: Text('Continue', style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
+          child: Text('Continue',
+              style: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white)),
         ),
       ),
     );

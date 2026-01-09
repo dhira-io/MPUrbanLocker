@@ -146,7 +146,7 @@ class _DocumentPreviewState extends State<DocumentPreview> {
     try {
       final pref = await SharedPreferences.getInstance();
       final userId = await pref.getString(AppConstants.userIdKey) ?? '';
-      final fileName = '${widget.title}_$userId'.replaceAll('/', '');
+      final fileName = '${widget.title}_$userId'.replaceAll('/', '').replaceAll(' ', '');
 
       await _saveToDownloads(bytesOfDoc!, fileName);
     } catch (e) {

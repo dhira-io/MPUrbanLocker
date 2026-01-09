@@ -109,7 +109,7 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
           final apiService = context.read<ApiService>();
 
           final Map<String, dynamic> response = await apiService.getRequest(
-            AppConstants.userDocumentsEndpoint(userId),
+            AppConstants.userDocumentsEndpoint,
             includeAuth: true,
           );
 
@@ -239,13 +239,15 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
             ],
           ),
         ),
-
         // --- LIST OR GRID BASED ON toggle ---
          showAllPopularDocs ?
              _buildPopularDocsGrid(context)
              : _buildDocumentsList(context),
         const SizedBox(height: 20),
 
+
+        // _smartInsightCard(),
+        // const SizedBox(height: 20),
         //scheme card
 /*
         Container(
@@ -459,6 +461,222 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
       ],
     );
   }
+
+  Widget _smartInsightCard() {
+    return  Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF0B3A8D),
+            Color(0xFF1E63E9),
+          ],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.15),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Smart AI Insight pill
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.orange,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.bolt, size: 14, color: Colors.white),
+                SizedBox(width: 4),
+                Text(
+                  "Smart AI Insight",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          // Title
+          const Text(
+            "We found more documents linked to\nyour mobile number",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              height: 1.3,
+            ),
+          ),
+
+          const SizedBox(height: 10),
+
+          // Description
+          const Text(
+            "You have 10 government documents registered\nwith your mobile number.\n\n"
+                "You’ve already fetched 4 documents in MP Urban\nLocker.",
+            style: TextStyle(
+              color: Colors.white70,
+              fontSize: 13,
+              height: 1.4,
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Available to access chip
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.18),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                Icon(Icons.lock_open, size: 16, color: Colors.white),
+                SizedBox(width: 6),
+                Text(
+                  "Available to access",
+                  style: TextStyle(color: Colors.white, fontSize: 12),
+                ),
+                SizedBox(width: 6),
+                Text(
+                  "6 more",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 14),
+
+          // Fetch button
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {},
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF6A48F2),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                elevation: 0,
+              ),
+              child: const Text(
+                "Fetch More Documents  >",
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 10),
+
+          // Footer note
+          const Row(
+            children: [
+              Icon(Icons.verified_user,
+                  size: 14, color: Colors.white70),
+              SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  "Documents are identified securely using your registered mobile number.",
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 11,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+
+  Widget _quickActionsGrid() {
+    final actions = [
+      "Validate Certificate",
+      "Document Drive",
+      "My Consents",
+      "Activity Log",
+      "Support",
+      "More",
+    ];
+
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: actions.length,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 12,
+      ),
+      itemBuilder: (context, index) {
+        return Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.lock_clock,
+                  color: Colors.deepPurple, size: 28),
+              const SizedBox(height: 8),
+              Container(
+                padding:
+                const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.deepPurple),
+                ),
+                child: const Text(
+                  "Coming Soon",
+                  style: TextStyle(
+                      fontSize: 10,
+                      color: Colors.deepPurple,
+                      fontWeight: FontWeight.w500),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                actions[index],
+                textAlign: TextAlign.center,
+                style:
+                const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
 
   // --- Builds the search suggestions list ---
   Widget _buildSuggestionsList() {

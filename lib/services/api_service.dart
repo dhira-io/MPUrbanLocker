@@ -160,7 +160,7 @@ class ApiService {
 
   Future<User> getUserProfile(String userId) async {
     Map<String, dynamic> response = await getRequest(
-      "${AppConstants.userProfileEndpoint(userId)}",
+      "${AppConstants.userProfileEndpoint}",
       includeAuth: true,
     );
     return User.fromJson(response as Map<String, dynamic>);
@@ -168,7 +168,7 @@ class ApiService {
 
   Future<Map<String, dynamic>> getProfileInfo(String userId) async {
     Map<String, dynamic> response = await getRequest(
-      "${AppConstants.userProfileEndpoint(userId)}",
+      "${AppConstants.userProfileEndpoint}",
       includeAuth: true,
     );
     return response;
@@ -271,7 +271,8 @@ class ApiService {
   }) async {
     try {
       await _checkInternet();
-
+print('$baseUrl$endpoint');
+print(body);
       final response = await _client
           .post(
             Uri.parse('$baseUrl$endpoint'),
