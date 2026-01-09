@@ -239,7 +239,17 @@ class _DashboardScreen_oldState extends State<DashboardScreen_old> {
           _buildDocumentsList(context),
           const SizedBox(height: 20),
 
-          _buildSectionHeader(title: 'State-wide statistics'),
+        //  _buildSectionHeader(title: 'State-wide statistics'),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(child: Text("State-wide statistics", style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600))),
+
+            ],
+          ),
+        ),
           _buildStatisticsRow(context),
           const SizedBox(height: 20),
 
@@ -254,7 +264,16 @@ class _DashboardScreen_oldState extends State<DashboardScreen_old> {
 
           const SizedBox(height: 20),
 
-          _buildSectionHeader(title: 'About MP Urban Locker'),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Flexible(child: Text("About MP Urban Locker", style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600))),
+
+              ],
+            ),
+          ),
           _buildAboutButtonsRow(context),
 
           const SizedBox(height: 30),
@@ -339,7 +358,9 @@ class _DashboardScreen_oldState extends State<DashboardScreen_old> {
         children: [
           Flexible(child: Text(title, style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600))),
           GestureDetector(
-            onTap: () {},
+            onTap: () {
+              _navigateToDigiLockerAuth(context, "documentType");
+            },
             child: Text(
               'View All',
               style: GoogleFonts.inter(fontSize: 14, color: ColorUtils.fromHex("#613AF5")),
@@ -361,26 +382,86 @@ class _DashboardScreen_oldState extends State<DashboardScreen_old> {
           Text(title, style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
         ],
+        // CarouselSlider.builder(
+        //   itemCount: AppConstants.appSlides.length,
+        //   options: CarouselOptions(
+        //     height: 150,
+        //     enlargeCenterPage: true,
+        //     viewportFraction: (screenWidth - 10) / screenWidth,
+        //     autoPlay: true,
+        //   ),
+        //   itemBuilder: (context, index, realIndex) {
+        //     final slide = AppConstants.appSlides[index];
+        //     return SizedBox(
+        //       width: screenWidth - 40,
+        //       child: Card(
+        //         elevation: 4,
+        //         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        //         clipBehavior: Clip.hardEdge,
+        //         child: Image.asset(slide["image"]!, fit: BoxFit.fitWidth),
+        //       ),
+        //     );
+        //   },
+        // ),
         CarouselSlider.builder(
           itemCount: AppConstants.appSlides.length,
           options: CarouselOptions(
-            height: 150,
+            height: 160,
             enlargeCenterPage: true,
             viewportFraction: (screenWidth - 10) / screenWidth,
+
             autoPlay: true,
+            autoPlayInterval: const Duration(seconds: 5),
+            onPageChanged: (index, reason) {
+              provider.setIndex(index);
+            },
           ),
           itemBuilder: (context, index, realIndex) {
             final slide = AppConstants.appSlides[index];
-            return SizedBox(
-              width: screenWidth - 40,
-              child: Card(
-                elevation: 4,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                clipBehavior: Clip.hardEdge,
-                child: Image.asset(slide["image"]!, fit: BoxFit.fitWidth),
+            return Container(
+              // The horizontal margin creates the visible gap between slides
+              margin: const EdgeInsets.symmetric(horizontal: 8.0),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 5,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.asset(
+                  slide["image"]!,
+                  fit: BoxFit.fitWidth,
+                  // Ensures the image fills the card without gaps inside
+                  width: double.infinity,
+                ),
               ),
             );
           },
+        ),
+        const SizedBox(height: 12),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: AppConstants.appSlides.asMap().entries.map((entry) {
+            bool isActive = provider.currentIndex == entry.key;
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              width: isActive ? 20 : 8,
+              // Expansion effect for active dot
+              height: 8,
+              decoration: BoxDecoration(
+                color: isActive
+                    ? const Color(0xFF5C3AFF)
+                    : Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(4),
+              ),
+            );
+          }).toList(),
         ),
       ],
     );
@@ -453,7 +534,7 @@ class _DashboardScreen_oldState extends State<DashboardScreen_old> {
                 child: DepartmentCard(
                   image: Image.asset('assets/appartment.png'),
                   iconColor: const Color(0xFF673AB7),
-                  title: 'Urban Admin & Development',
+                  title: 'Urban Administration & development Department',
                 ),
               ),
             ],

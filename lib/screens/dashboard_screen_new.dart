@@ -11,8 +11,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/document.dart';
+import '../models/documentExpiry_model.dart';
 import '../providers/auth_provider.dart';
 import '../providers/onboarding_provider.dart'; // Used for Carousel index
+import '../providers/scheme_provider.dart';
 import '../services/api_service.dart';
 import '../services/config_service.dart';
 import '../utils/constants.dart';
@@ -23,6 +25,7 @@ import 'FAQScreen.dart';
 import 'NotificationScreen.dart';
 import 'PrivacyPolicyScreen.dart';
 import 'TermsConditionScreen.dart';
+import 'category_wise_doc_list_screen.dart';
 import 'combine_dashboard.dart';
 
 class DashboardScreen_new extends StatefulWidget {
@@ -62,6 +65,19 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       getDocuments();
     });
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // 1. Access the provider
+      final provider = Provider.of<SchemeProvider>(context, listen: false);
+
+      // 3. Await the second call (Documents)
+      // This ensures provider.documents is now full of data
+      await provider.fetchDocumentsExpiry(context);
+
+      // 4. Check if the widget is still in the tree before showing dialog
+      if (mounted) {
+        _checkAndShowExpiryPopup(provider.documents);
+      }
+    });
 
     // Initialize with an empty list for suggestions
     _filteredServices = [];
@@ -70,6 +86,141 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
     _searchController.addListener(_onSearchChanged);
     _searchFocusNode.addListener(_onFocusChange);
   }
+  void _checkAndShowExpiryPopup(List<DocumentExpiry> documents) {
+    // 1. Filter the list to get ALL documents with expiry enabled
+    final expiredDocs = documents.where((doc) => doc.hasExpiry == true).toList();
+
+    // 2. Only show the dialog if the list is not empty
+    if (expiredDocs.isNotEmpty) {
+      showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (context) {
+          return Dialog(
+            backgroundColor: Colors.transparent,
+            insetPadding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFF0D1E4B), Color(0xFF1A3B8B)],
+                ),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min, // Dialog shrinks to fit content
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          'Document Validity Expired!',
+                          style: GoogleFonts.inter(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFF8C00),
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          child: Text(
+                            'Close',
+                            style: GoogleFonts.inter(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // 3. The List of Expired Documents
+                  Flexible(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: expiredDocs.map((doc) => Padding(
+                          padding: const EdgeInsets.only(bottom: 12.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                doc.docType.replaceAll('_', ' '),
+                                style: GoogleFonts.inter(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: const Color(0xFFDBEAFE),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                doc.expiryDate != null && doc.expiryDate!.isNotEmpty
+                                    ? 'Expires: ${doc.expiryDate}'
+                                    : 'Expiry tracking active',
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white70,
+                                ),
+                              ),
+                              const Divider(color: Colors.white10, height: 20),
+                            ],
+                          ),
+                        )).toList(),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  // White Action Button
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12)
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Got it',
+                            style: GoogleFonts.inter(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFF613AF5),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          const Icon(Icons.arrow_forward_ios, size: 14, color: Color(0xFF613AF5)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    }
+  }
+
 
   @override
   void dispose() {
@@ -102,47 +253,47 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
 
   Future<void> getDocuments() async {
     List<Document> loadedDocs = [];
-       // Only fetch documents if the user is logged in
-        try {
-          final pref =await SharedPreferences.getInstance();
-          String userId = await pref.getString(AppConstants.userIdKey) ?? "";
-          final apiService = context.read<ApiService>();
+    // Only fetch documents if the user is logged in
+    try {
+      final pref = await SharedPreferences.getInstance();
+      String userId = await pref.getString(AppConstants.userIdKey) ?? "";
+      final apiService = context.read<ApiService>();
 
-          final Map<String, dynamic> response = await apiService.getRequest(
-            AppConstants.userDocumentsEndpoint,
-            includeAuth: true,
-          );
+      final Map<String, dynamic> response = await apiService.getRequest(
+        AppConstants.userDocumentsEndpoint,
+        includeAuth: true,
+      );
 
-          if (response['success'] == true && response['data'] != null) {
-            final Map<String, dynamic> data =
+      if (response['success'] == true && response['data'] != null) {
+        final Map<String, dynamic> data =
             response['data'] as Map<String, dynamic>;
 
-            final List<dynamic> documents = (data['documents'] as List?) ?? [];
-            List<Document> arrdocuments = documents
-                .map((e) => Document.fromJson(e as Map<String, dynamic>))
-                .toList();
-            loadedDocs = {
-              for (final doc in arrdocuments)
-                if (doc.doctype != null) doc.doctype!: doc,
-            }.values.toList();
-          } else {
-            String errorMessage = response['message'] ?? 'Something went wrong';
-            Fluttertoast.showToast(msg: errorMessage);
-          }
-        } on NoInternetException catch (e) {
-          debugPrint('Fetch Error: $e');
-          Fluttertoast.showToast(msg: '${e.toString()}');
-        } catch (e) {
-          debugPrint('Fetch Error: $e');
-          Fluttertoast.showToast(msg: '${e.toString()}');
-        } finally {
-          if (mounted) {
-            setState(() {
-              isLoading = false;
-              issuedDocs = loadedDocs;
-            });
-          }
-        }
+        final List<dynamic> documents = (data['documents'] as List?) ?? [];
+        List<Document> arrdocuments = documents
+            .map((e) => Document.fromJson(e as Map<String, dynamic>))
+            .toList();
+        loadedDocs = {
+          for (final doc in arrdocuments)
+            if (doc.doctype != null) doc.doctype!: doc,
+        }.values.toList();
+      } else {
+        String errorMessage = response['message'] ?? 'Something went wrong';
+        Fluttertoast.showToast(msg: errorMessage);
+      }
+    } on NoInternetException catch (e) {
+      debugPrint('Fetch Error: $e');
+      Fluttertoast.showToast(msg: '${e.toString()}');
+    } catch (e) {
+      debugPrint('Fetch Error: $e');
+      Fluttertoast.showToast(msg: '${e.toString()}');
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+          issuedDocs = loadedDocs;
+        });
+      }
+    }
   }
 
   // --- BOTTOM NAV NAVIGATION HANDLER ---
@@ -211,15 +362,15 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
-              child: Text(
-                'Documents you might need',
-                style: GoogleFonts.inter(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: ColorUtils.fromHex("#1F2937"),
+                child: Text(
+                  'Documents you might need',
+                  style: GoogleFonts.inter(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: ColorUtils.fromHex("#1F2937"),
+                  ),
                 ),
               ),
-            ),
               SizedBox(width: 5),
               GestureDetector(
                 onTap: () {
@@ -240,16 +391,21 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
           ),
         ),
         // --- LIST OR GRID BASED ON toggle ---
-         showAllPopularDocs ?
-             _buildPopularDocsGrid(context)
-             : _buildDocumentsList(context),
+        showAllPopularDocs
+            ? _buildPopularDocsGrid(context)
+            : _buildDocumentsList(context),
         const SizedBox(height: 20),
 
+        _sectionTitle("Document Categories"),
+        Padding(
+          padding: const EdgeInsets.only(left: 16,right: 16,top: 10),
+          child: _documentCategories(),
+        ),
 
         // _smartInsightCard(),
         // const SizedBox(height: 20),
         //scheme card
-/*
+        /*
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
@@ -337,87 +493,97 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
           ),
         ),
 */
-                // 4. Quick Actions Grid
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(
-                  left: 16.0,
-                  right: 16.0,
-                  top: 8.0,
-                  bottom: 10.0,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                     Text(
-                      "Quick Actions",
+        // 4. Quick Actions Grid
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(
+                left: 16.0,
+                right: 16.0,
+                top: 8.0,
+                bottom: 10.0,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Quick Actions",
+                    style: GoogleFonts.inter(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: ColorUtils.fromHex("#1F2937"),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      print("View All Quick Actions");
+                    },
+                    child: Text(
+                      'View All',
                       style: GoogleFonts.inter(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: ColorUtils.fromHex("#1F2937")
+                        fontSize: 14,
+                        color: ColorUtils.fromHex("#613AF5"),
+                        fontWeight: FontWeight.w400,
                       ),
                     ),
-                    GestureDetector(
-                      onTap: () {
-                        print("View All Quick Actions");
-                      },
-                      child: Text(
-                        'View All',
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          color: ColorUtils.fromHex("#613AF5"),
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              // GridView for Quick Actions
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: GridView.count(
-                  crossAxisCount: 3,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  mainAxisSpacing: 10,
-                  crossAxisSpacing: 10,
-                  childAspectRatio: 0.9,
-                  // Adjust ratio for better text fit
-                  children: [
-                    _buildQuickActionTile(
-                      "Validate Certificate",
-                      Icons.qr_code,
-                      Colors.red,
-                    ),
-                    _buildQuickActionTile(
-                      "Document Drive",
-                      Icons.drive_folder_upload_rounded,
-                      Colors.blue,
-                    ),
-                    _buildQuickActionTile(
-                      "My Consents",
-                      Icons.question_mark_rounded,
-                      Colors.green,
-                    ),
-                    _buildQuickActionTile(
-                      "Activity Log",
-                      Icons.history,
-                      Colors.blueAccent,
-                    ),
-                    _buildQuickActionTile(
-                      "Support",
-                      Icons.support_agent,
-                      Colors.cyan,
-                    ),
-                    _buildQuickActionTile("More", Icons.add, Colors.amber),
-                  ],
-                ),
+            ),
+            // GridView for Quick Actions
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: GridView.count(
+                crossAxisCount: 3,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 10,
+                childAspectRatio: 0.9,
+                // Adjust ratio for better text fit
+                children: [
+                  _buildQuickActionTile(
+                    "Validate Certificate",
+                    Icons.qr_code,
+                    //ColorUtils.fromHex("#EBE5FF"),
+                    Colors.deepPurpleAccent.shade100,
+                  ),
+                  _buildQuickActionTile(
+                    "Document Drive",
+                    Icons.drive_folder_upload_rounded,
+                    Colors.deepPurpleAccent.shade100,
+                    // Colors.blue,
+                  ),
+                  _buildQuickActionTile(
+                    "My Consents",
+                    Icons.question_mark_rounded,
+                    Colors.deepPurpleAccent.shade100,
+                    //Colors.green,
+                  ),
+                  _buildQuickActionTile(
+                    "Activity Log",
+                    Icons.history,
+                    Colors.deepPurpleAccent.shade100,
+                    // Colors.blueAccent,
+                  ),
+                  _buildQuickActionTile(
+                    "Support",
+                    Icons.support_agent,
+                    Colors.deepPurpleAccent.shade100,
+                    //  Colors.cyan,
+                  ),
+                  _buildQuickActionTile(
+                    "More",
+                    Icons.add,
+                    Colors.deepPurpleAccent.shade100,
+                    // Colors.amber
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
+        ),
 
         const SizedBox(height: 20),
 
@@ -428,7 +594,7 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "eNagar Palika documents",
+                "Issued documents",
                 style: GoogleFonts.inter(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
@@ -462,18 +628,81 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
     );
   }
 
+  Widget _sectionTitle(String title) {
+    return Padding(
+      padding: EdgeInsets.only(left: 16),
+      child: Text(
+        title,
+        style: GoogleFonts.inter(
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+          color: ColorUtils.fromHex("#1F2937"),
+        ),
+      ),
+    );
+  }
+
+  Widget _documentCategories() {
+    return Row(
+      children: [
+        _categoryCard("Documents for\nCitizen / Individual", Icons.group),
+        const SizedBox(width: 12),
+        _categoryCard("Documents for\nBusiness Entity", Icons.business),
+      ],
+    );
+  }
+
+  Widget _categoryCard(String title, IconData icon) {
+    return Expanded(
+      child: InkWell(
+        onTap: (){
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) =>
+                  CategoryWiseDocListScreen(),
+            ),
+          ).then((_) {
+            print("refresh call");
+            getDocuments();
+          });
+
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            children: [
+              CircleAvatar(
+                backgroundColor: Colors.deepPurple.shade50,
+                radius: 26,
+                child: Icon(icon, color: Colors.deepPurple),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _smartInsightCard() {
-    return  Container(
+    return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF0B3A8D),
-            Color(0xFF1E63E9),
-          ],
+          colors: [Color(0xFF0B3A8D), Color(0xFF1E63E9)],
         ),
         boxShadow: [
           BoxShadow(
@@ -528,12 +757,8 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
           // Description
           const Text(
             "You have 10 government documents registered\nwith your mobile number.\n\n"
-                "You’ve already fetched 4 documents in MP Urban\nLocker.",
-            style: TextStyle(
-              color: Colors.white70,
-              fontSize: 13,
-              height: 1.4,
-            ),
+            "You’ve already fetched 4 documents in MP Urban\nLocker.",
+            style: TextStyle(color: Colors.white70, fontSize: 13, height: 1.4),
           ),
 
           const SizedBox(height: 16),
@@ -583,10 +808,7 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
               ),
               child: const Text(
                 "Fetch More Documents  >",
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                ),
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
               ),
             ),
           ),
@@ -596,16 +818,12 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
           // Footer note
           const Row(
             children: [
-              Icon(Icons.verified_user,
-                  size: 14, color: Colors.white70),
+              Icon(Icons.verified_user, size: 14, color: Colors.white70),
               SizedBox(width: 6),
               Expanded(
                 child: Text(
                   "Documents are identified securely using your registered mobile number.",
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 11,
-                  ),
+                  style: TextStyle(color: Colors.white70, fontSize: 11),
                 ),
               ),
             ],
@@ -614,69 +832,6 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
       ),
     );
   }
-
-
-  Widget _quickActionsGrid() {
-    final actions = [
-      "Validate Certificate",
-      "Document Drive",
-      "My Consents",
-      "Activity Log",
-      "Support",
-      "More",
-    ];
-
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: actions.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
-      ),
-      itemBuilder: (context, index) {
-        return Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.lock_clock,
-                  color: Colors.deepPurple, size: 28),
-              const SizedBox(height: 8),
-              Container(
-                padding:
-                const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.deepPurple),
-                ),
-                child: const Text(
-                  "Coming Soon",
-                  style: TextStyle(
-                      fontSize: 10,
-                      color: Colors.deepPurple,
-                      fontWeight: FontWeight.w500),
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                actions[index],
-                textAlign: TextAlign.center,
-                style:
-                const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
 
   // --- Builds the search suggestions list ---
   Widget _buildSuggestionsList() {
@@ -696,7 +851,11 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
           final service = _filteredServices[index];
 
           return ListTile(
-            leading: CircleAvatar(radius: 28, backgroundColor: service.bgcolor, child: Image.asset(service.imagePath)),
+            leading: CircleAvatar(
+              radius: 28,
+              backgroundColor: service.bgcolor,
+              child: Image.asset(service.imagePath),
+            ),
             title: Text(
               service.displayName,
               style: GoogleFonts.inter(
@@ -777,25 +936,25 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
 
   Future<bool> _showExitDialog(BuildContext context) async {
     return await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text("Exit App"),
-          content: const Text("Do you want to close this app?"),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text("No"),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: const Text("Yes"),
-            ),
-          ],
-        );
-      },
-    ) ??
+          context: context,
+          barrierDismissible: false,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text("Exit App"),
+              content: const Text("Do you want to close this app?"),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text("No"),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: const Text("Yes"),
+                ),
+              ],
+            );
+          },
+        ) ??
         false;
   }
 
@@ -822,10 +981,7 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
                     width: 33,
                     height: 40,
                     //color: Colors.blue[50],
-                    child: Image.asset(
-                      logoImage,
-                      color: Color(0xff613AF5),
-                    ),
+                    child: Image.asset(logoImage, color: Color(0xff613AF5)),
                   ),
                   const SizedBox(width: 10),
                   Flexible(
@@ -860,7 +1016,10 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => ComingSoonScreen(docType: "Documents Drive")),
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        ComingSoonScreen(docType: "Documents Drive"),
+                  ),
                 );
               },
             ),
@@ -873,7 +1032,9 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => ComingSoonScreen(docType: "Settings")),
+                  MaterialPageRoute(
+                    builder: (_) => ComingSoonScreen(docType: "Settings"),
+                  ),
                 );
               },
             ),
@@ -886,7 +1047,10 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => ComingSoonScreen(docType: "Validate Certificate")),
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        ComingSoonScreen(docType: "Validate Certificate"),
+                  ),
                 );
               },
             ),
@@ -899,7 +1063,9 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => ComingSoonScreen(docType: "Activity Log")),
+                  MaterialPageRoute(
+                    builder: (_) => ComingSoonScreen(docType: "Activity Log"),
+                  ),
                 );
               },
             ),
@@ -912,7 +1078,10 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => ComingSoonScreen(docType: "Contact Support")),
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        ComingSoonScreen(docType: "Contact Support"),
+                  ),
                 );
               },
             ),
@@ -1053,9 +1222,7 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
             Icons.qr_code_scanner,
             color: ColorUtils.fromHex("#212121"),
           ),
-          onPressed: () {
-          
-          },
+          onPressed: () {},
         ),
         Builder(
           builder: (context) => IconButton(
@@ -1167,7 +1334,8 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
                 borderRadius: BorderRadius.circular(12),
                 child: Image.asset(
                   slide["image"]!,
-                  fit: BoxFit.fitWidth, // Ensures the image fills the card without gaps inside
+                  fit: BoxFit.fitWidth,
+                  // Ensures the image fills the card without gaps inside
                   width: double.infinity,
                 ),
               ),
@@ -1183,10 +1351,13 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
             return AnimatedContainer(
               duration: const Duration(milliseconds: 300),
               margin: const EdgeInsets.symmetric(horizontal: 4),
-              width: isActive ? 20 : 8, // Expansion effect for active dot
+              width: isActive ? 20 : 8,
+              // Expansion effect for active dot
               height: 8,
               decoration: BoxDecoration(
-                color: isActive ? const Color(0xFF5C3AFF) : Colors.grey.shade300,
+                color: isActive
+                    ? const Color(0xFF5C3AFF)
+                    : Colors.grey.shade300,
                 borderRadius: BorderRadius.circular(4),
               ),
             );
@@ -1195,6 +1366,7 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
       ],
     );
   }
+
   // --- HORIZONTAL DOCUMENTS LIST (Popular Docs) ---
   // This now uses the original, unfiltered list of services
   Widget _buildDocumentsList(context) {
@@ -1249,18 +1421,22 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
   Widget _buildQuickActionTile(String title, IconData icon, Color color) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(context, MaterialPageRoute(builder: (_) => ComingSoonScreen(docType: title)));
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(
+        //     builder: (_) => ComingSoonScreen(docType: title),
+        //   ),
+        // );
       },
       child: Container(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(15.0),
+          borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              spreadRadius: 1,
-              blurRadius: 5,
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 6,
               offset: const Offset(0, 2),
             ),
           ],
@@ -1268,23 +1444,61 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircleAvatar(
-              radius: 28,
-              backgroundColor: color.withOpacity(0.15),
-              child: Icon(icon, size: 28, color: color),
-            ),
-            const SizedBox(height: 5),
-            Flexible(
-              child: Text(
-                title,
-                textAlign: TextAlign.center,
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: ColorUtils.fromHex("#374151"),
+            // ICON + OVERLAY BADGE
+            Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.center,
+              children: [
+                // Icon background
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: color.withOpacity(0.12),
+                  ),
+                  child: Icon(icon, size: 26, color: color),
                 ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+
+                // Coming Soon badge (overlapping)
+                Positioned(
+                  bottom: -6,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.transparent,
+                      //const Color(0xFFEDE9FE), // light purple
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: const Color(0xFFDDD6FE)),
+                    ),
+                    child: Text(
+                      "Coming Soon",
+                      style: GoogleFonts.inter(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w500,
+                        color: const Color(0xFF6D28D9),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 5),
+
+            // Title
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.inter(
+                fontSize: 12,
+                fontWeight: FontWeight.w300,
+                color: ColorUtils.fromHex("#374151"),
               ),
             ),
           ],
@@ -1427,10 +1641,12 @@ class CategoryCard extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(10.0),
       child: Container(
+        alignment: Alignment.center,
         width: 140,
+        height: 140,
         // Fixed width for horizontal scroll
         margin: const EdgeInsets.symmetric(horizontal: 4.0),
-        padding: const EdgeInsets.all(12.0),
+        //padding: const EdgeInsets.all(12.0),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(15.0),
@@ -1444,24 +1660,52 @@ class CategoryCard extends StatelessWidget {
           ],
         ),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            CircleAvatar(radius: 28, backgroundColor: bgColor, child: image),
-            const SizedBox(height: 4),
-            SizedBox(
-              height: 42,
-              child: Text(
-                title,
-                textAlign: TextAlign.center,
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: ColorUtils.fromHex("#4B5563"),
+            Expanded(
+              flex: 5,
+              child: Container(
+                alignment: Alignment.bottomCenter,
+                child: CircleAvatar(
+                  radius: 28,
+                  backgroundColor: bgColor,
+                  child: image,
                 ),
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
               ),
             ),
+            Expanded(
+              flex: 3,
+              child: Container(
+                child: Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: ColorUtils.fromHex("#4B5563"),
+                  ),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
+
+            // const SizedBox(height: 10),
+            // CircleAvatar(radius: 28, backgroundColor: bgColor, child: image),
+            // const SizedBox(height: 4),
+            // Text(
+            //   title,
+            //   textAlign: TextAlign.center,
+            //   style: GoogleFonts.inter(
+            //     fontSize: 12,
+            //     fontWeight: FontWeight.w600,
+            //     color: ColorUtils.fromHex("#4B5563"),
+            //   ),
+            //   maxLines: 3,
+            //   overflow: TextOverflow.ellipsis,
+            // ),
+            // const SizedBox(height: 10),
           ],
         ),
       ),

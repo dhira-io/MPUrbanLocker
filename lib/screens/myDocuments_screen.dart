@@ -149,8 +149,15 @@ class _MyDocumentsScreenState extends State<MyDocumentsScreen> {
         const SizedBox(height: 20),
 
         // Categories Section
-        _buildSectionTitle(title: 'Categories', showViewAll: true),
-        _buildCategoriesGrid(),
+        Padding(
+          padding: const EdgeInsets.only(left: 16,right: 16),
+          child: _buildSectionTitle(title: 'Categories', showViewAll: true),
+        ),
+        //_buildCategoriesGrid(),
+        Padding(
+          padding: const EdgeInsets.only(left: 16,right: 16),
+          child: _documentCategories(),
+        ),
         const SizedBox(height: 30),
 
         // What's New Section (using the banner image from the screenshot)
@@ -160,6 +167,42 @@ class _MyDocumentsScreenState extends State<MyDocumentsScreen> {
     );
   }
 
+  Widget _documentCategories() {
+    return Row(
+      children: [
+        _categoryCard("Documents for\nCitizen / Individual", Icons.group),
+        const SizedBox(width: 12),
+        _categoryCard("Documents for\nBusiness Entity", Icons.business),
+      ],
+    );
+  }
+
+  Widget _categoryCard(String title, IconData icon) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          children: [
+            CircleAvatar(
+              backgroundColor: Colors.deepPurple.shade50,
+              radius: 26,
+              child: Icon(icon, color: Colors.deepPurple),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
   // --- Builds the search suggestions list ---
   Widget _buildSuggestionsList() {
     return Container(
@@ -519,12 +562,14 @@ class CategoryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(15.0),
+      borderRadius: BorderRadius.circular(10.0),
       child: Container(
+        alignment: Alignment.center,
         width: 140,
+        height: 140,
         // Fixed width for horizontal scroll
         margin: const EdgeInsets.symmetric(horizontal: 4.0),
-        padding: const EdgeInsets.all(12.0),
+        //padding: const EdgeInsets.all(12.0),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(15.0),
@@ -538,28 +583,52 @@ class CategoryCard extends StatelessWidget {
           ],
         ),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            CircleAvatar(
-              radius: 28,
-              backgroundColor: bgColor,
-              child: image,
-            ),
-            const SizedBox(height: 8),
-            SizedBox(
-              height: 42,
-              child: Text(
-                title,
-                textAlign: TextAlign.center,
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  color: ColorUtils.fromHex("#4B5563"),
-                  fontWeight: FontWeight.w600,
+            Expanded(
+              flex: 5,
+              child: Container(
+                alignment: Alignment.bottomCenter,
+                child: CircleAvatar(
+                  radius: 28,
+                  backgroundColor: bgColor,
+                  child: image,
                 ),
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
               ),
             ),
+            Expanded(
+              flex: 3,
+              child: Container(
+                child: Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: ColorUtils.fromHex("#4B5563"),
+                  ),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
+
+            // const SizedBox(height: 10),
+            // CircleAvatar(radius: 28, backgroundColor: bgColor, child: image),
+            // const SizedBox(height: 4),
+            // Text(
+            //   title,
+            //   textAlign: TextAlign.center,
+            //   style: GoogleFonts.inter(
+            //     fontSize: 12,
+            //     fontWeight: FontWeight.w600,
+            //     color: ColorUtils.fromHex("#4B5563"),
+            //   ),
+            //   maxLines: 3,
+            //   overflow: TextOverflow.ellipsis,
+            // ),
+            // const SizedBox(height: 10),
           ],
         ),
       ),

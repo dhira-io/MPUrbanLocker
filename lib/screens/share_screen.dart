@@ -4,7 +4,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../components/common_appbar.dart';
+import '../services/api_service.dart';
 import '../utils/color_utils.dart';
+import 'package:provider/provider.dart';
+
+import '../utils/constants.dart';
 
 class ShareScreen extends StatefulWidget {
   final String documentTitle;
@@ -31,8 +35,8 @@ class _ShareScreenState extends State<ShareScreen> {
 
   final TextEditingController _shareWithController = TextEditingController();
 
-  // NEW: fields to hold custom range selection
-  DateTimeRange? _customDateRange;
+  // single custom expiry date (max 7 days from now)
+  DateTime? _customExpiryDate;
 
   @override
   void initState() {
@@ -271,10 +275,8 @@ class _ShareScreenState extends State<ShareScreen> {
   // ---------- STEP 2 (UPDATED) ----------
   Widget _buildDurationStep() {
     final String customLabel;
-    if (_customDateRange != null) {
-      final from = DateFormat('d MMM').format(_customDateRange!.start);
-      final to = DateFormat('d MMM').format(_customDateRange!.end);
-      customLabel = 'Custom ($from - $to)';
+    if (_customExpiryDate != null) {
+      customLabel = DateFormat('EEE, MMM d').format(_customExpiryDate!);
     } else {
       customLabel = 'Custom';
     }
@@ -326,7 +328,6 @@ class _ShareScreenState extends State<ShareScreen> {
                         '1 hour', DurationOption.oneHour),
                     _buildDurationButton(
                         '24 hours', DurationOption.twentyFourHours),
-                    // Custom button now opens date range picker
                     _buildCustomDurationButton(customLabel),
                   ],
                 ),
@@ -539,9 +540,8 @@ class _ShareScreenState extends State<ShareScreen> {
       onPressed: () {
         setState(() {
           _selectedDurationOption = option;
-          // Reset custom range when fixed duration is chosen
           if (option != DurationOption.custom) {
-            _customDateRange = null;
+            _customExpiryDate = null;
           }
         });
       },
@@ -565,42 +565,30 @@ class _ShareScreenState extends State<ShareScreen> {
     );
   }
 
-  // NEW: custom duration button with date-range picker limited to 7 days
+  // custom duration button with single date picker (max 7 days)
   Widget _buildCustomDurationButton(String label) {
     bool isSelected = _selectedDurationOption == DurationOption.custom;
 
     return ElevatedButton(
       onPressed: () async {
         final now = DateTime.now();
-        final initialStart = _customDateRange?.start ?? now;
-        final initialEnd =
-            _customDateRange?.end ?? now.add(const Duration(days: 1));
+        final DateTime firstDate =
+        DateTime(now.year, now.month, now.day); // today (no time)
+        final DateTime lastDate =
+        firstDate.add(const Duration(days: 7)); // max +7 days
 
-        final picked = await showDateRangePicker(
+        final picked = await showDatePicker(
           context: context,
-          firstDate: now,
-          lastDate: now.add(const Duration(days: 7)),
-          initialDateRange: DateTimeRange(
-            start: initialStart,
-            end: initialEnd.isAfter(now.add(const Duration(days: 7)))
-                ? now.add(const Duration(days: 7))
-                : initialEnd,
-          ),
-          helpText: 'Select validity (max 7 days)',
+          initialDate: _customExpiryDate ?? firstDate,
+          firstDate: firstDate,
+          lastDate: lastDate,
+          helpText: 'Select date',
         );
 
         if (picked != null) {
-          // Enforce maximum 7-day range
-          final maxEnd = picked.start.add(const Duration(days: 7));
-          final correctedEnd =
-          picked.end.isAfter(maxEnd) ? maxEnd : picked.end;
-
           setState(() {
             _selectedDurationOption = DurationOption.custom;
-            _customDateRange = DateTimeRange(
-              start: picked.start,
-              end: correctedEnd,
-            );
+            _customExpiryDate = picked;
           });
         }
       },
@@ -682,11 +670,10 @@ class _ShareScreenState extends State<ShareScreen> {
   Widget _buildSharingSummaryCard() {
     String expiresOn;
     if (_selectedDurationOption == DurationOption.custom &&
-        _customDateRange != null) {
-      expiresOn =
-          DateFormat('d MMM yyyy, hh:mm a').format(_customDateRange!.end);
+        _customExpiryDate != null) {
+      expiresOn = DateFormat('d MMM yyyy, hh:mm a').format(_customExpiryDate!);
     } else {
-      // fallback: fixed expiration (your existing logic or a default)
+      // fallback: fixed expiration for non-custom selections
       expiresOn = DateFormat('d MMM yyyy, hh:mm a')
           .format(DateTime.now().add(const Duration(days: 2)));
     }
@@ -854,7 +841,7 @@ class _ShareScreenState extends State<ShareScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) =>  SharedDocListScreen(),
+                  builder: (context) => const SharedDocListScreen(),
                 ),
               );
             }
@@ -916,4 +903,40 @@ class _ShareScreenState extends State<ShareScreen> {
       ),
     );
   }
+
+  Future<void> fetchSchemes(BuildContext context) async {
+    // _isLoading = true;
+    // _errorMessage = '';
+    // notifyListeners();
+
+    try {
+      final apiService = context.read<ApiService>();
+
+      final Map<String, dynamic> response = await apiService.getRequest(
+        AppConstants.schemeMatchesEndpoint,
+        includeAuth: true,
+      );
+
+      if (response['success'] == true && response['data'] != null) {
+        final Map<String, dynamic> decodedData = response;
+        final schemeResponse = SchemeResponse.fromJson(decodedData);
+        _allSchemes = schemeResponse.matches; // store original
+        _schemes = _allSchemes;
+      } else {
+        _errorMessage = response['message'] ?? 'Something went wrong';
+        Fluttertoast.showToast(msg: _errorMessage);
+      }
+    } on NoInternetException catch (e) {
+      _errorMessage = e.toString();
+      Fluttertoast.showToast(msg: _errorMessage);
+    } catch (e) {
+      _errorMessage = 'Failed to load schemes';
+      debugPrint('Fetch Error: $e');
+      Fluttertoast.showToast(msg: _errorMessage);
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
 }
