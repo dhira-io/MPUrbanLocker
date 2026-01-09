@@ -904,39 +904,39 @@ class _ShareScreenState extends State<ShareScreen> {
     );
   }
 
-  Future<void> fetchSchemes(BuildContext context) async {
-    // _isLoading = true;
-    // _errorMessage = '';
-    // notifyListeners();
-
-    try {
-      final apiService = context.read<ApiService>();
-
-      final Map<String, dynamic> response = await apiService.getRequest(
-        AppConstants.schemeMatchesEndpoint,
-        includeAuth: true,
-      );
-
-      if (response['success'] == true && response['data'] != null) {
-        final Map<String, dynamic> decodedData = response;
-        final schemeResponse = SchemeResponse.fromJson(decodedData);
-        _allSchemes = schemeResponse.matches; // store original
-        _schemes = _allSchemes;
-      } else {
-        _errorMessage = response['message'] ?? 'Something went wrong';
-        Fluttertoast.showToast(msg: _errorMessage);
-      }
-    } on NoInternetException catch (e) {
-      _errorMessage = e.toString();
-      Fluttertoast.showToast(msg: _errorMessage);
-    } catch (e) {
-      _errorMessage = 'Failed to load schemes';
-      debugPrint('Fetch Error: $e');
-      Fluttertoast.showToast(msg: _errorMessage);
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
+  // Future<void> fetchSchemes(BuildContext context) async {
+  //   // _isLoading = true;
+  //   // _errorMessage = '';
+  //   // notifyListeners();
+  //
+  //   try {
+  //     final apiService = context.read<ApiService>();
+  //
+  //     final Map<String, dynamic> response = await apiService.getRequest(
+  //       AppConstants.schemeMatchesEndpoint,
+  //       includeAuth: true,
+  //     );
+  //
+  //     if (response['success'] == true && response['data'] != null) {
+  //       final Map<String, dynamic> decodedData = response;
+  //       final schemeResponse = SchemeResponse.fromJson(decodedData);
+  //       _allSchemes = schemeResponse.matches; // store original
+  //       _schemes = _allSchemes;
+  //     } else {
+  //       _errorMessage = response['message'] ?? 'Something went wrong';
+  //       Fluttertoast.showToast(msg: _errorMessage);
+  //     }
+  //   } on NoInternetException catch (e) {
+  //     _errorMessage = e.toString();
+  //     Fluttertoast.showToast(msg: _errorMessage);
+  //   } catch (e) {
+  //     _errorMessage = 'Failed to load schemes';
+  //     debugPrint('Fetch Error: $e');
+  //     Fluttertoast.showToast(msg: _errorMessage);
+  //   } finally {
+  //     _isLoading = false;
+  //     notifyListeners();
+  //   }
+  // }
 
 }
