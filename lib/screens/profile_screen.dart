@@ -230,7 +230,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             title: "Date Of Birth",
             value: _formatDob(_userDOB),
             subtitle: "From Aadhaar (read-only)",
-            trailing: Image.asset("assets/edit.png")
           ),
           Divider(color: Color(0xffF3F4F6)),
           _infoRow(
@@ -240,8 +239,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             title: "Registered Mobile",
             value: _mobile,
             subtitle: "Verified & secured",
-            trailing:
-            Icon(Icons.verified, color: Colors.green),
           ),
         ],
       ),
@@ -255,7 +252,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     required String title,
     required String value,
     required String subtitle,
-    Widget? trailing,
+    //Widget? trailing,
   }) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -296,7 +293,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ],
             ),
           ),
-          if (trailing != null) trailing,
+          // if (trailing != null) trailing,
         ],
       ),
     );

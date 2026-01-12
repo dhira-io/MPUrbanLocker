@@ -108,7 +108,7 @@ class _MyDocumentsScreenState extends State<MyDocumentsScreen> {
         const SizedBox(height: 10),
 
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -600,29 +600,30 @@ class CategoryCard extends StatelessWidget {
           children: [
             Expanded(
               flex: 5,
-              child: Container(
-                alignment: Alignment.bottomCenter,
-                child: CircleAvatar(
-                  radius: 28,
-                  backgroundColor: bgColor,
-                  child: image,
+              child: Padding(
+                padding:  EdgeInsets.only(bottom: 8),
+                child: Container(
+                  alignment: Alignment.bottomCenter,
+                  child: CircleAvatar(
+                    radius: 28,
+                    backgroundColor: bgColor,
+                    child: image,
+                  ),
                 ),
               ),
             ),
             Expanded(
               flex: 3,
-              child: Container(
-                child: Text(
-                  title,
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: ColorUtils.fromHex("#4B5563"),
-                  ),
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
+              child: Text(
+                title,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: ColorUtils.fromHex("#4B5563"),
                 ),
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
 

@@ -10,6 +10,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../models/document.dart';
 import '../models/documentExpiry_model.dart';
 import '../providers/auth_provider.dart';
@@ -678,16 +679,27 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
           ),
           child: Column(
             children: [
-              CircleAvatar(
-                backgroundColor: Colors.deepPurple.shade50,
-                radius: 26,
-                child: Icon(icon, color: Colors.deepPurple),
+              Padding(
+                padding:  EdgeInsets.only(bottom: 8),
+                child: Container(
+                  alignment: Alignment.bottomCenter,
+                  child: CircleAvatar(
+                    backgroundColor: Colors.deepPurple.shade50,
+                    radius: 28,
+                    child: Icon(icon, color: Colors.deepPurple),
+                  ),
+                ),
               ),
-              const SizedBox(height: 12),
               Text(
                 title,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: ColorUtils.fromHex("#4B5563"),
+                ),
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),
@@ -896,42 +908,44 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
       default:
         currentBody = _buildHomePage();
     }
-    return PopScope(
-      canPop: false,
-      onPopInvoked: (didPop) async {
-        if (didPop) return;
+    return SafeArea(
+      child: PopScope(
+        canPop: false,
+        onPopInvoked: (didPop) async {
+          if (didPop) return;
 
-        final shouldExit = await _showExitDialog(context);
-        if (shouldExit) {
-          SystemNavigator.pop(); // closes the app
-        }
-      },
-      child: Scaffold(
-        appBar: _buildAppBar(),
-        body: currentBody,
-        // Displays the content of the selected tab
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
-          selectedItemColor: ColorUtils.fromHex("#613AF5"),
-          unselectedItemColor: ColorUtils.fromHex("#9CA3AF"),
-          type: BottomNavigationBarType.fixed,
-          // Use fixed for more than 3 items
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.description),
-              label: 'Documents',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.notifications),
-              label: 'Notifications',
-            ),
-            BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-          ],
+          final shouldExit = await _showExitDialog(context);
+          if (shouldExit) {
+            SystemNavigator.pop(); // closes the app
+          }
+        },
+        child: Scaffold(
+          appBar: _buildAppBar(),
+          body: currentBody,
+          // Displays the content of the selected tab
+          bottomNavigationBar: BottomNavigationBar(
+            currentIndex: _selectedIndex,
+            onTap: _onItemTapped,
+            selectedItemColor: ColorUtils.fromHex("#613AF5"),
+            unselectedItemColor: ColorUtils.fromHex("#9CA3AF"),
+            type: BottomNavigationBarType.fixed,
+            // Use fixed for more than 3 items
+            items: const [
+              BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.description),
+                label: 'Documents',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.notifications),
+                label: 'Notifications',
+              ),
+              BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+            ],
+          ),
+
+          endDrawer: _buildDrawer(context),
         ),
-
-        endDrawer: _buildDrawer(context),
       ),
     );
   }
@@ -1201,7 +1215,7 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
   }
 
   // --- APP BAR ---
-  PreferredSizeWidget _buildAppBar() {
+/*
     return AppBar(
       automaticallyImplyLeading: false,
       title: Row(
@@ -1252,7 +1266,121 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
         ),
       ],
     );
-  }
+*/
+  PreferredSizeWidget _buildAppBar() {
+      return PreferredSize(
+        preferredSize: const Size.fromHeight(100), // 40 + 60
+        child: Column(
+          children: [
+            // --- 1. Government Purple Header ---
+            Container(
+              width: double.infinity,
+              color: ColorUtils.fromHex("#613AF5"),
+              height: 40,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  Image.asset('assets/india_flag.png', height: 25),
+                  const SizedBox(width: 8),
+                  GestureDetector(
+                    onTap: () async {
+                      final uri = Uri.parse('https://www.india.gov.in/');
+                      if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+                        Fluttertoast.showToast(msg: "Could not open website");
+                      }
+                    },
+                    child: Text(
+                      'Gov. of India',
+                      style: GoogleFonts.inter(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  IconButton(icon: const Icon(Icons.open_in_new, color: Colors.white, size: 16),
+                    onPressed: () async {
+                      final uri = Uri.parse('https://www.india.gov.in/');
+                      if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+                        Fluttertoast.showToast(msg: "Could not open website");
+                      }
+                    },),
+                  const Spacer(),
+                  const Icon(Icons.g_translate, color: Colors.white, size: 25),
+                  // If you want accessibility text/icon:
+                  // const SizedBox(width: 12),
+                  // const Icon(Icons.accessibility, color: Colors.white, size: 20),
+                ],
+              ),
+            ),
+
+            // --- 2. Main White AppBar Header ---
+            Container(
+              height: 60,
+              color: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  SizedBox(width: 24, height: 40, child: Image.asset(lionImage)),
+                  const SizedBox(width: 8),
+                  SizedBox(
+                    width: 33,
+                    height: 40,
+                    child: Image.asset(logoImage, color: ColorUtils.fromHex("#613AF5")),
+                  ),
+                  const SizedBox(width: 10),
+                  Flexible(
+                    child: Text(
+                      'MP Urban Locker',
+                      style: GoogleFonts.inter(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: ColorUtils.fromHex("#613AF5"),
+                      ),
+                    ),
+                  ),
+
+                  // QR Icon
+                  IconButton(
+                    icon: Icon(
+                      Icons.qr_code_scanner,
+                      color: ColorUtils.fromHex("#212121"),
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ComingSoonScreen(docType: "Activity Log"),
+                        ),
+                      );
+                    },
+                  ),
+
+                  const SizedBox(width: 12),
+
+                  // Menu / Drawer Icon
+                  Builder(
+                    builder: (context) => GestureDetector(
+                      onTap: () => Scaffold.of(context).openEndDrawer(),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey.shade300),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(Icons.menu, color: Colors.black, size: 24),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
 
   // --- SEARCH BAR ---
   Widget _buildSearchBar() {
@@ -1697,18 +1825,16 @@ class CategoryCard extends StatelessWidget {
             ),
             Expanded(
               flex: 3,
-              child: Container(
-                child: Text(
-                  title,
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: ColorUtils.fromHex("#4B5563"),
-                  ),
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
+              child: Text(
+                title,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: ColorUtils.fromHex("#4B5563"),
                 ),
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
 
