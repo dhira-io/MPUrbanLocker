@@ -1,54 +1,50 @@
-
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:provider/provider.dart';
+
+import '../services/api_service.dart';
+import '../utils/constants.dart';
 
 class SharedDocListProvider extends ChangeNotifier {
-  final List<Map<String, dynamic>> documents = [
-    {
-      "title": "Driving License",
-      "sharedWith": "S. Singh",
-      "file": "Driving License.pdf",
-      "method": "Secure Link",
-      "protection": "OTP Protected",
-      "permission": "View & Download",
-      "expiry": "29 Dec 2025, 07:21 AM",
-      "icon": Icons.badge,
-    },
-    {
-      "title": "Driving License",
-      "sharedWith": "R. Kumar",
-      "file": "Driving License.pdf",
-      "method": "Secure Link",
-      "protection": "OTP Protected",
-      "permission": "View Only",
-      "expiry": "01 Jan 2026, 10:00 AM",
-      "icon": Icons.badge,
-    },
-    {
-      "title": "Vehicle Registration Certificate",
-      "sharedWith": "Tarun J.",
-      "file": "RC.pdf",
-      "method": "Secure Link",
-      "protection": "OTP Protected",
-      "permission": "View Only",
-      "expiry": "15 Feb 2026, 09:00 AM",
-      "icon": Icons.directions_car,
-    },
-    {
-      "title": "Marksheet / Certificates",
-      "sharedWith": "R. Kumar",
-      "file": "Marksheet.pdf",
-      "method": "Secure Link",
-      "protection": "OTP Protected",
-      "permission": "View & Download",
-      "expiry": "30 Jun 2026, 06:30 PM",
-      "icon": Icons.school,
-    },
-  ];
+  final List<SharedDocModel> documents = [];
+  List<bool> expanded = [];
 
-  late List<bool> expanded;
+  bool isLoading = false;
+  String errorMessage = '';
 
-  SharedDocListProvider() {
-    expanded = List.generate(documents.length, (_) => false);
+  Future<void> apicall_GetAllShareDocList(BuildContext context) async {
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      final apiService = context.read<ApiService>();
+
+      final response = await apiService.getRequest(
+        AppConstants.shareListEndpoint,
+        includeAuth: true,
+      );
+
+      if (response['success'] == true && response['data'] != null) {
+        final List list = response['data']['shares'];
+
+        documents
+          ..clear()
+          ..addAll(
+            list.map((e) => SharedDocModel.fromJson(e)).toList(),
+          );
+
+        expanded = List.generate(documents.length, (_) => false);
+      } else {
+        errorMessage = response['message'] ?? 'Something went wrong';
+        Fluttertoast.showToast(msg: errorMessage);
+      }
+    } catch (e) {
+      debugPrint('Fetch Error: $e');
+      Fluttertoast.showToast(msg: e.toString());
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
   }
 
   void toggleExpanded(int index) {
@@ -57,4 +53,104 @@ class SharedDocListProvider extends ChangeNotifier {
   }
 
   bool isExpanded(int index) => expanded[index];
+}
+
+
+class SharedDocModel {
+  final String id;
+  final String documentName;
+  final String documentType;
+  final String documentSource;
+  final String shareToken;
+  final String shareUrl;
+  final String shareMethod;
+  final String protectionType;
+  final String? pin;
+  final bool canDownload;
+  final DateTime expiresAt;
+  final String sharedWithName;
+  final int accessCount;
+  final DateTime? lastAccessedAt;
+  final bool isRevoked;
+  final bool isExpired;
+  final DateTime createdAt;
+
+  SharedDocModel({
+    required this.id,
+    required this.documentName,
+    required this.documentType,
+    required this.documentSource,
+    required this.shareToken,
+    required this.shareUrl,
+    required this.shareMethod,
+    required this.protectionType,
+    this.pin,
+    required this.canDownload,
+    required this.expiresAt,
+    required this.sharedWithName,
+    required this.accessCount,
+    this.lastAccessedAt,
+    required this.isRevoked,
+    required this.isExpired,
+    required this.createdAt,
+  });
+
+  // ---------- FROM JSON ----------
+  factory SharedDocModel.fromJson(Map<String, dynamic> json) {
+    return SharedDocModel(
+      id: json['id'] as String,
+      documentName: json['documentName'] as String,
+      documentType: json['documentType'] as String,
+      documentSource: json['documentSource'] as String,
+      shareToken: json['shareToken'] as String,
+      shareUrl: json['shareUrl'] as String,
+      shareMethod: json['shareMethod'] as String,
+      protectionType: json['protectionType'] as String,
+
+      // 🔥 pin can be int / string / null
+      pin: json['pin']?.toString(),
+
+      canDownload: json['canDownload'] as bool,
+
+      // 🔥 Convert UTC → local for UI safety
+      expiresAt: DateTime.parse(json['expiresAt']).toLocal(),
+
+      sharedWithName: json['sharedWithName'] as String,
+
+      accessCount: json['accessCount'] as int,
+
+      // 🔥 nullable date
+      lastAccessedAt: json['lastAccessedAt'] != null
+          ? DateTime.parse(json['lastAccessedAt']).toLocal()
+          : null,
+
+      isRevoked: json['isRevoked'] as bool,
+      isExpired: json['isExpired'] as bool,
+
+      createdAt: DateTime.parse(json['createdAt']).toLocal(),
+    );
+  }
+
+  // ---------- TO JSON (optional) ----------
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'documentName': documentName,
+      'documentType': documentType,
+      'documentSource': documentSource,
+      'shareToken': shareToken,
+      'shareUrl': shareUrl,
+      'shareMethod': shareMethod,
+      'protectionType': protectionType,
+      'pin': pin,
+      'canDownload': canDownload,
+      'expiresAt': expiresAt.toUtc().toIso8601String(),
+      'sharedWithName': sharedWithName,
+      'accessCount': accessCount,
+      'lastAccessedAt': lastAccessedAt?.toUtc().toIso8601String(),
+      'isRevoked': isRevoked,
+      'isExpired': isExpired,
+      'createdAt': createdAt.toUtc().toIso8601String(),
+    };
+  }
 }

@@ -1,216 +1,234 @@
+import 'package:digilocker_flutter/screens/share_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
+import '../components/common_appbar.dart';
+import '../providers/shared_doc_list_provider.dart';
+import '../utils/color_utils.dart';
 
-import '../providers/editdoc_share_provider.dart';
+class EditShareDetailsScreen extends StatefulWidget {
+  final SharedDocModel document;
 
-class EditDocShareScreen extends StatelessWidget {
-  const EditDocShareScreen({super.key});
+  const EditShareDetailsScreen({Key? key, required this.document}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => EditDocShareProvider(),
-      child: const _EditDocShareView(),
-    );
-  }
+  _EditShareDetailsScreenState createState() => _EditShareDetailsScreenState();
 }
 
-class _EditDocShareView extends StatelessWidget {
-  const _EditDocShareView();
+class _EditShareDetailsScreenState extends State<EditShareDetailsScreen> {
+  late String _method;
+  late String _protection;
+  late String _sharedWith;
+  late DateTime _expiresOn;
+  final TextEditingController _pinController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _method =  widget.document.shareMethod;
+     _protection = widget.document.shareMethod; //widget.document.protectionType;
+     _sharedWith = widget.document.sharedWithName;
+     _expiresOn = widget.document.expiresAt;
+  }
+
+
+  @override
+  void dispose() {
+    _pinController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final provider = context.watch<EditDocShareProvider>();
-
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 1,
-        leading: const Icon(Icons.arrow_back, color: Colors.black),
-        title: const Text(
-          "Driving License",
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
-        ),
-      ),
+      backgroundColor: ColorUtils.fromHex("#F9FAFB"),
+      appBar: CustomAppBar(),
+      endDrawer: customEndDrawer(context),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _sharingSummaryCard(provider),
+            _buildHeader(),
             const SizedBox(height: 24),
-            _actionButtons(provider),
+            _buildSharingSummaryCard(),
+            const SizedBox(height: 24),
+            _buildActionButtons(),
             const SizedBox(height: 16),
-            _shareButton(provider),
+            _buildShareDocumentButton(),
           ],
         ),
       ),
     );
   }
 
-  Widget _sharingSummaryCard(EditDocShareProvider provider) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade300),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            "Sharing Summary",
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
-          ),
-          const SizedBox(height: 16),
-
-          _readOnlyField("Document", provider.documentController),
-          _dropdownField(
-            "Method",
-            provider.selectedMethod,
-            provider.methods,
-            provider.setMethod,
-          ),
-          _dropdownField(
-            "Protection",
-            provider.selectedProtection,
-            provider.protections,
-            provider.setProtection,
-          ),
-          _readOnlyField("Shared With", provider.sharedWithController),
-          _dropdownField(
-            "Expires On",
-            provider.selectedExpiry,
-            provider.expiryOptions,
-            provider.setExpiry,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _readOnlyField(String label, TextEditingController controller) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-          ),
-          const SizedBox(height: 6),
-          TextFormField(
-            controller: controller,
-            readOnly: true,
-            decoration: _inputDecoration(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _dropdownField(
-      String label,
-      String value,
-      List<String> items,
-      ValueChanged<String> onChanged,
-      ) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-          ),
-          const SizedBox(height: 6),
-          DropdownButtonFormField<String>(
-            value: value,
-            items: items
-                .map(
-                  (e) => DropdownMenuItem(
-                value: e,
-                child: Text(e),
-              ),
-            )
-                .toList(),
-            onChanged: (val) => onChanged(val!),
-            decoration: _inputDecoration(),
-            icon: const Icon(Icons.keyboard_arrow_down),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _actionButtons(EditDocShareProvider provider) {
+  Widget _buildHeader() {
     return Row(
       children: [
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed: provider.saveDetails,
-            icon: const Icon(Icons.check, size: 18),
-            label: const Text("Save Details"),
-            style: _outlinedButtonStyle(Colors.deepPurple),
-          ),
+        IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).pop(),
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed: provider.revokeLink,
-            icon: const Icon(Icons.close, size: 18),
-            label: const Text("Revoke Link"),
-            style: _outlinedButtonStyle(Colors.red),
-          ),
+        Text(
+          widget.document.documentName,
+          style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w600),
         ),
       ],
     );
   }
 
-  Widget _shareButton(EditDocShareProvider provider) {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: provider.shareDocument,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.deepPurple,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+  Widget _buildSharingSummaryCard() {
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200, width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Sharing Summary', style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600)),
+          const SizedBox(height: 16),
+          _buildTextFieldRow('Document', '${widget.document.documentName}.pdf'),
+          _buildDropdownRow('Method', _method, ['link', 'qr'], (val) => setState(() => _method = val!)),
+           _buildDropdownRow('Protection', _method, ['link', 'qr'], (val) => setState(() => _protection = val!)),
+          // if (_protection == 'Generate PIN') _buildTextFieldRow('PIN', '4832', controller: _pinController, isEditable: true),
+          // _buildTextFieldRow('Shared With', _sharedWith, isEditable: true),
+          _buildTextFieldRow('PIN', '${widget.document.pin}'),
+          _buildTextFieldRow('Shared With', '${widget.document.documentName}'),
+          _buildDateFieldRow('Expires On', _expiresOn, (date) => setState(() => _expiresOn = date)),
+
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTextFieldRow(String label, String value, {bool isEditable = false, TextEditingController? controller}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        children: [
+          Expanded(flex: 2, child: Text(label, style: GoogleFonts.inter(color: Colors.grey.shade600))),
+          Expanded(flex: 3,
+              child: isEditable
+                  ? TextFormField(initialValue: value, controller: controller, decoration: _inputDecoration(), style: GoogleFonts.inter(fontWeight: FontWeight.w600))
+                  : Text(value, style: GoogleFonts.inter(fontWeight: FontWeight.w600))
           ),
-          elevation: 1,
-        ),
-        child: const Text(
-          "Share Document",
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-        ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDropdownRow(String label, String value, List<String> items, ValueChanged<String?> onChanged) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        children: [
+          Expanded(flex: 2, child: Text(label, style: GoogleFonts.inter(color: Colors.grey.shade600))),
+          Expanded(flex: 3,
+            child: DropdownButtonFormField<String>(
+              value: value,
+              items: items.map((item) => DropdownMenuItem(value: item, child: Text(item))).toList(),
+              onChanged: onChanged,
+              decoration: _inputDecoration(),
+              style: GoogleFonts.inter(fontWeight: FontWeight.w600, color: Colors.black),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDateFieldRow(String label, DateTime value, ValueChanged<DateTime> onDateChanged) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        children: [
+          Expanded(flex: 2, child: Text(label, style: GoogleFonts.inter(color: Colors.grey.shade600))),
+          Expanded(flex: 3,
+            child: InkWell(
+              onTap: () async {
+                final pickedDate = await showDatePicker(context: context, initialDate: value, firstDate: DateTime.now(), lastDate: DateTime.now().add(const Duration(days: 365 * 5)));
+                if (pickedDate != null) onDateChanged(pickedDate);
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade400),
+                    borderRadius: BorderRadius.circular(8)
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(DateFormat('d MMM yyyy, hh:mm a').format(value), style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+                    const Icon(Icons.arrow_drop_down, color: Colors.grey),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
   InputDecoration _inputDecoration() {
     return InputDecoration(
-      contentPadding:
-      const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-      filled: true,
-      fillColor: Colors.white,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide(color: Colors.grey.shade300),
-      ),
+      contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey.shade400)),
+      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey.shade400)),
+      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: ColorUtils.fromHex("#5A48F5"))),
     );
   }
 
-  ButtonStyle _outlinedButtonStyle(Color color) {
-    return OutlinedButton.styleFrom(
-      foregroundColor: color,
-      side: BorderSide(color: color),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      padding: const EdgeInsets.symmetric(vertical: 14),
+  Widget _buildActionButtons() {
+    return Row(
+      children: [
+        Expanded(
+          child: ElevatedButton.icon(
+            onPressed: () {
+              // Logic to save details
+              Navigator.pop(context);
+            },
+            icon: const Icon(Icons.check, color: Colors.white),
+            label: const Text('Save Details', style: TextStyle(color: Colors.white)),
+            style: ElevatedButton.styleFrom(
+                backgroundColor: ColorUtils.fromHex("#5A48F5"),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                padding: const EdgeInsets.symmetric(vertical: 12)
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: () { print('Revoke link tapped'); },
+            icon: const Icon(Icons.close, color: Colors.red),
+            label: const Text('Revoke Link', style: TextStyle(color: Colors.red)),
+            style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: Colors.red),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                padding: const EdgeInsets.symmetric(vertical: 12)
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildShareDocumentButton() {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: () { print('Share document tapped'); },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: ColorUtils.fromHex("#5A48F5").withOpacity(0.8),
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+        child: const Text('Share Document', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+      ),
     );
   }
 }

@@ -40,6 +40,7 @@ class AppConstants {
       '/api/shares/documents/$docId';
   static String editShareDocumentEndpoint(String docId) =>
       '/api/shares/$docId';
+  static const String shareListEndpoint = '/api/shares';
   // User endpoints
   static const String userProfileEndpoint = '/api/users/me/profile';
 

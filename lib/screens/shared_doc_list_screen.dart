@@ -2,6 +2,7 @@ import 'package:digilocker_flutter/providers/shared_doc_list_provider.dart';
 import 'package:digilocker_flutter/screens/editdoc_share_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 
 import '../components/common_appbar.dart';
 import '../utils/color_utils.dart';
@@ -12,7 +13,8 @@ class SharedDocListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => SharedDocListProvider(),
+      create: (_) =>
+      SharedDocListProvider()..apicall_GetAllShareDocList(context),
       child: const _SharedDocumentListsView(),
     );
   }
@@ -58,7 +60,7 @@ class _SharedDocumentListsView extends StatelessWidget {
         ),
         Expanded(
           child: Text(
-            "widget.title",
+            "Shared Documents",
             style: const TextStyle(fontSize: 18),
             overflow: TextOverflow.ellipsis,
           ),
@@ -88,7 +90,7 @@ class _SharedDocumentListsView extends StatelessWidget {
       SharedDocListProvider provider,
       int index,
       ) {
-    final doc = provider.documents[index];
+    final SharedDocModel doc = provider.documents[index];
     final isExpanded = provider.isExpanded(index);
 
     return Card(
@@ -100,10 +102,10 @@ class _SharedDocumentListsView extends StatelessWidget {
           ListTile(
             leading: CircleAvatar(
               backgroundColor: const Color(0xFFEDE7FF),
-              child: Icon(doc["icon"], color: Colors.deepPurple),
+              child: Image.asset('assets/services/trade_license_certificate.png'),
             ),
-            title: Text(doc["title"]),
-            subtitle: Text("Shared with ${doc["sharedWith"]}"),
+            title: Text(doc.documentName),
+            subtitle: Text("Shared with ${doc.sharedWithName}"),
             trailing: Icon(
               isExpanded
                   ? Icons.keyboard_arrow_up
@@ -116,17 +118,22 @@ class _SharedDocumentListsView extends StatelessWidget {
       ),
     );
   }
+  String formatDate(DateTime isoDate) {
+    final localDate = isoDate.toLocal();     // IST
+    return DateFormat("dd MMM yyyy . hh:mm a").format(localDate);
+  }
 
-  Widget _expandedContent(Map<String, dynamic> doc,BuildContext context) {
+  Widget _expandedContent(SharedDocModel  doc,BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
       child: Column(
         children: [
-          _summaryRow("Document", doc["file"]),
-          _summaryRowWithIcon("Method", Icons.link, doc["method"]),
-          _summaryRowWithIcon("Protection", Icons.lock, doc["protection"]),
-          _summaryRow("Shared With", doc["sharedWith"]),
-          _summaryRow("Expires On", doc["expiry"]),
+          _summaryRow("Document", doc.documentName),
+          _summaryRowWithIcon("Method", Icons.link, doc.shareMethod),
+          _summaryRowWithIcon("Protection", Icons.lock, doc.protectionType),
+          _summaryRow("PIN", doc.pin ?? ''),
+          _summaryRow("Permission", doc.canDownload == true ? "View & Download" : "View"),
+          _summaryRow("Expires On", formatDate(doc.expiresAt)),
           const SizedBox(height: 16),
           Row(
             children: [
@@ -136,7 +143,7 @@ class _SharedDocumentListsView extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>  EditDocShareScreen(),
+                        builder: (context) =>  EditShareDetailsScreen(document: doc,),
                       ),
                     );
                   },
