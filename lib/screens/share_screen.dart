@@ -1,13 +1,17 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:digilocker_flutter/screens/shared_doc_list_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-
+import 'package:path_provider/path_provider.dart';
 import '../components/common_appbar.dart';
 import '../services/api_service.dart';
 import '../utils/color_utils.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../utils/constants.dart';
 
@@ -15,26 +19,33 @@ class ShareScreen extends StatefulWidget {
   final String documentTitle;
   final String documentId;
 
-  const ShareScreen({Key? key, required this.documentTitle,required this.documentId}) : super(key: key);
+  const ShareScreen({
+    Key? key,
+    required this.documentTitle,
+    required this.documentId,
+  }) : super(key: key);
 
   @override
   _ShareScreenState createState() => _ShareScreenState();
 }
 
 enum ShareOption { link, qr }
-enum ProtectionOption { otp, withoutOtp }
+
+enum ProtectionOption { pin, withoutPin }
+
 enum DurationOption { fifteenMin, oneHour, twentyFourHours, custom }
+
 enum PermissionOption { viewOnly, viewAndDownload }
 
 class _ShareScreenState extends State<ShareScreen> {
   int _currentStep = 0;
   bool _isFlowComplete = false;
-
+  ShareResponseModel? objShareRespnse;
   ShareOption? _selectedOption;
   ProtectionOption? _selectedProtectionOption;
   DurationOption? _selectedDurationOption;
   PermissionOption? _selectedPermissionOption;
-
+  Map<String, dynamic> reqParams = {};
   final TextEditingController _shareWithController = TextEditingController();
 
   // single custom expiry date (max 7 days from now)
@@ -64,9 +75,7 @@ class _ShareScreenState extends State<ShareScreen> {
         children: [
           _buildHeader(),
           if (!_isFlowComplete) _buildStepper(),
-          Expanded(
-            child: _buildContent(),
-          ),
+          Expanded(child: _buildContent()),
           _buildContinueButton(),
         ],
       ),
@@ -134,30 +143,27 @@ class _ShareScreenState extends State<ShareScreen> {
           height: 24,
           child: isCompleted
               ? Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: ColorUtils.fromHex("#1DBF73"),
-            ),
-            child: const Icon(Icons.check,
-                color: Colors.white, size: 16),
-          )
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: ColorUtils.fromHex("#1DBF73"),
+                  ),
+                  child: const Icon(Icons.check, color: Colors.white, size: 16),
+                )
               : isActive
               ? CircularProgressIndicator(
-            value: 0.75,
-            strokeWidth: 2,
-            valueColor: AlwaysStoppedAnimation(
-                ColorUtils.fromHex("#1DBF73")),
-            backgroundColor: Colors.grey.shade300,
-          )
+                  value: 0.75,
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation(
+                    ColorUtils.fromHex("#1DBF73"),
+                  ),
+                  backgroundColor: Colors.grey.shade300,
+                )
               : Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: Colors.grey.shade400,
-                width: 2,
-              ),
-            ),
-          ),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.grey.shade400, width: 2),
+                  ),
+                ),
         ),
         const SizedBox(height: 8),
         Text(
@@ -166,8 +172,9 @@ class _ShareScreenState extends State<ShareScreen> {
           style: GoogleFonts.inter(
             fontSize: 12,
             fontWeight: FontWeight.w500,
-            color:
-            (isActive || isCompleted) ? Colors.black : Colors.grey.shade600,
+            color: (isActive || isCompleted)
+                ? Colors.black
+                : Colors.grey.shade600,
           ),
         ),
       ],
@@ -202,14 +209,12 @@ class _ShareScreenState extends State<ShareScreen> {
         children: [
           Text(
             'Share Document',
-            style:
-            GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600),
+            style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           Text(
             'Choose how you want to share this document securely.',
-            style: GoogleFonts.inter(
-                fontSize: 14, color: Colors.grey.shade600),
+            style: GoogleFonts.inter(fontSize: 14, color: Colors.grey.shade600),
           ),
           const SizedBox(height: 32),
           _buildShareOptionCard(
@@ -223,7 +228,7 @@ class _ShareScreenState extends State<ShareScreen> {
             icon: Icons.qr_code,
             title: 'Generate QR Code',
             subtitle:
-            'Generate a QR code that can be scanned to access the document.',
+                'Generate a QR code that can be scanned to access the document.',
             option: ShareOption.qr,
           ),
         ],
@@ -240,29 +245,26 @@ class _ShareScreenState extends State<ShareScreen> {
         children: [
           Text(
             'Set Access Protection',
-            style:
-            GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600),
+            style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           Text(
             'Choose how the recipient should access this document.',
-            style: GoogleFonts.inter(
-                fontSize: 14, color: Colors.grey.shade600),
+            style: GoogleFonts.inter(fontSize: 14, color: Colors.grey.shade600),
           ),
           const SizedBox(height: 32),
           _buildProtectionOptionCard(
             icon: Icons.phone_android_outlined,
-            title: 'OTP Protected',
-            subtitle: 'Recipient will receive a one-time password.',
-            option: ProtectionOption.otp,
+            title: 'Generate PIN',
+            subtitle: 'You will receive a PIN on your registered mobile number.',
+            option: ProtectionOption.pin,
           ),
           const SizedBox(height: 16),
           _buildProtectionOptionCard(
             icon: Icons.lock_open_outlined,
-            title: 'Without OTP',
-            subtitle:
-            'Anyone with the link or QR can access the document.',
-            option: ProtectionOption.withoutOtp,
+            title: 'Share Without PIN',
+            subtitle: 'Anyone with the link or QR can access the document.',
+            option: ProtectionOption.withoutPin,
           ),
           const SizedBox(height: 24),
           _buildInfoBox(
@@ -290,14 +292,12 @@ class _ShareScreenState extends State<ShareScreen> {
         children: [
           Text(
             'Set Access Duration',
-            style:
-            GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600),
+            style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           Text(
             'Choose how long this document should remain accessible.',
-            style: GoogleFonts.inter(
-                fontSize: 14, color: Colors.grey.shade600),
+            style: GoogleFonts.inter(fontSize: 14, color: Colors.grey.shade600),
           ),
           const SizedBox(height: 32),
           Container(
@@ -313,7 +313,9 @@ class _ShareScreenState extends State<ShareScreen> {
                 Text(
                   'Document Access Validity',
                   style: GoogleFonts.inter(
-                      fontSize: 16, fontWeight: FontWeight.w600),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 GridView.count(
@@ -325,11 +327,14 @@ class _ShareScreenState extends State<ShareScreen> {
                   crossAxisSpacing: 12,
                   children: [
                     _buildDurationButton(
-                        '15 minutes', DurationOption.fifteenMin),
+                      '15 minutes',
+                      DurationOption.fifteenMin,
+                    ),
+                    _buildDurationButton('1 hour', DurationOption.oneHour),
                     _buildDurationButton(
-                        '1 hour', DurationOption.oneHour),
-                    _buildDurationButton(
-                        '24 hours', DurationOption.twentyFourHours),
+                      '24 hours',
+                      DurationOption.twentyFourHours,
+                    ),
                     _buildCustomDurationButton(customLabel),
                   ],
                 ),
@@ -340,7 +345,7 @@ class _ShareScreenState extends State<ShareScreen> {
           _buildInfoBox(
             icon: Icons.info_outline,
             text:
-            'After expiry, the document cannot be accessed by anyone using the shared link or QR code.',
+                'After expiry, the document cannot be accessed by anyone using the shared link or QR code.',
             isBlue: true,
           ),
         ],
@@ -357,14 +362,12 @@ class _ShareScreenState extends State<ShareScreen> {
         children: [
           Text(
             'Set Access Permissions',
-            style:
-            GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600),
+            style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           Text(
             'Choose what the recipient is allowed to do.',
-            style: GoogleFonts.inter(
-                fontSize: 14, color: Colors.grey.shade600),
+            style: GoogleFonts.inter(fontSize: 14, color: Colors.grey.shade600),
           ),
           const SizedBox(height: 32),
           _buildPermissionOptionCard(
@@ -384,7 +387,7 @@ class _ShareScreenState extends State<ShareScreen> {
           _buildInfoBox(
             icon: Icons.shield_outlined,
             text:
-            'Downloaded files are encrypted and watermarked for security.',
+                'Downloaded files are encrypted and watermarked for security.',
           ),
         ],
       ),
@@ -394,8 +397,7 @@ class _ShareScreenState extends State<ShareScreen> {
   // ---------- SUMMARY STEP ----------
   Widget _buildSummaryStep() {
     return SingleChildScrollView(
-      padding:
-      const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -405,20 +407,13 @@ class _ShareScreenState extends State<ShareScreen> {
               shape: BoxShape.circle,
               color: ColorUtils.fromHex("#1DBF73"),
             ),
-            child: const Icon(
-              Icons.check,
-              color: Colors.white,
-              size: 48,
-            ),
+            child: const Icon(Icons.check, color: Colors.white, size: 48),
           ),
           const SizedBox(height: 16),
           Text(
             'Your secure shareable item has been generated.',
             textAlign: TextAlign.center,
-            style: GoogleFonts.inter(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
+            style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 24),
           _buildSharingSummaryCard(),
@@ -458,21 +453,28 @@ class _ShareScreenState extends State<ShareScreen> {
                 color: ColorUtils.fromHex("#EEF2FF"),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon,
-                  color: ColorUtils.fromHex("#5A48F5"), size: 24),
+              child: Icon(icon, color: ColorUtils.fromHex("#5A48F5"), size: 24),
             ),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title,
-                      style: GoogleFonts.inter(
-                          fontSize: 16, fontWeight: FontWeight.w600)),
+                  Text(
+                    title,
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                   const SizedBox(height: 4),
-                  Text(subtitle,
-                      style: GoogleFonts.inter(
-                          fontSize: 12, color: Colors.grey.shade600)),
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -511,21 +513,28 @@ class _ShareScreenState extends State<ShareScreen> {
                 color: ColorUtils.fromHex("#EEF2FF"),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon,
-                  color: ColorUtils.fromHex("#5A48F5"), size: 24),
+              child: Icon(icon, color: ColorUtils.fromHex("#5A48F5"), size: 24),
             ),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title,
-                      style: GoogleFonts.inter(
-                          fontSize: 16, fontWeight: FontWeight.w600)),
+                  Text(
+                    title,
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                   const SizedBox(height: 4),
-                  Text(subtitle,
-                      style: GoogleFonts.inter(
-                          fontSize: 12, color: Colors.grey.shade600)),
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -548,10 +557,12 @@ class _ShareScreenState extends State<ShareScreen> {
         });
       },
       style: ElevatedButton.styleFrom(
-        backgroundColor:
-        isSelected ? ColorUtils.fromHex("#EEF2FF") : Colors.grey.shade100,
-        foregroundColor:
-        isSelected ? ColorUtils.fromHex("#4F46E5") : Colors.black,
+        backgroundColor: isSelected
+            ? ColorUtils.fromHex("#EEF2FF")
+            : Colors.grey.shade100,
+        foregroundColor: isSelected
+            ? ColorUtils.fromHex("#4F46E5")
+            : Colors.black,
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
@@ -574,10 +585,14 @@ class _ShareScreenState extends State<ShareScreen> {
     return ElevatedButton(
       onPressed: () async {
         final now = DateTime.now();
-        final DateTime firstDate =
-        DateTime(now.year, now.month, now.day); // today (no time)
-        final DateTime lastDate =
-        firstDate.add(const Duration(days: 7)); // max +7 days
+        final DateTime firstDate = DateTime(
+          now.year,
+          now.month,
+          now.day,
+        ); // today (no time)
+        final DateTime lastDate = firstDate.add(
+          const Duration(days: 7),
+        ); // max +7 days
 
         final picked = await showDatePicker(
           context: context,
@@ -595,10 +610,12 @@ class _ShareScreenState extends State<ShareScreen> {
         }
       },
       style: ElevatedButton.styleFrom(
-        backgroundColor:
-        isSelected ? ColorUtils.fromHex("#EEF2FF") : Colors.grey.shade100,
-        foregroundColor:
-        isSelected ? ColorUtils.fromHex("#4F46E5") : Colors.black,
+        backgroundColor: isSelected
+            ? ColorUtils.fromHex("#EEF2FF")
+            : Colors.grey.shade100,
+        foregroundColor: isSelected
+            ? ColorUtils.fromHex("#4F46E5")
+            : Colors.black,
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
@@ -644,21 +661,28 @@ class _ShareScreenState extends State<ShareScreen> {
                 color: ColorUtils.fromHex("#EEF2FF"),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon,
-                  color: ColorUtils.fromHex("#5A48F5"), size: 24),
+              child: Icon(icon, color: ColorUtils.fromHex("#5A48F5"), size: 24),
             ),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title,
-                      style: GoogleFonts.inter(
-                          fontSize: 16, fontWeight: FontWeight.w600)),
+                  Text(
+                    title,
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                   const SizedBox(height: 4),
-                  Text(subtitle,
-                      style: GoogleFonts.inter(
-                          fontSize: 12, color: Colors.grey.shade600)),
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -676,8 +700,9 @@ class _ShareScreenState extends State<ShareScreen> {
       expiresOn = DateFormat('d MMM yyyy, hh:mm a').format(_customExpiryDate!);
     } else {
       // fallback: fixed expiration for non-custom selections
-      expiresOn = DateFormat('d MMM yyyy, hh:mm a')
-          .format(DateTime.now().add(const Duration(days: 2)));
+      expiresOn = DateFormat(
+        'd MMM yyyy, hh:mm a',
+      ).format(DateTime.now().add(const Duration(days: 2)));
     }
 
     return Container(
@@ -690,21 +715,34 @@ class _ShareScreenState extends State<ShareScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Sharing Summary',
-              style: GoogleFonts.inter(
-                  fontSize: 16, fontWeight: FontWeight.w600)),
+          Text(
+            'Sharing Summary',
+            style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600),
+          ),
           const SizedBox(height: 16),
           _buildSummaryRow('Document', '${widget.documentTitle}.pdf'),
-          _buildSummaryRow('Method', _getShareOptionString(_selectedOption),
-              icon: Icons.link),
           _buildSummaryRow(
-              'Protection',
-              _getProtectionOptionString(_selectedProtectionOption),
-              icon: Icons.lock_outline),
+            'Method',
+            _getShareOptionString(_selectedOption),
+            icon: Icons.link,
+          ),
           _buildSummaryRow(
-              'Permission', _getPermissionOptionString(_selectedPermissionOption)),
+            'Protection',
+            _getProtectionOptionString(_selectedProtectionOption),
+            icon: Icons.lock_outline,
+          ),
+          objShareRespnse != null
+              ? _buildSummaryRow('PIN', objShareRespnse?.pin ?? '')
+              : Text(''),
+          _buildSummaryRow(
+            'Permission',
+            _getPermissionOptionString(_selectedPermissionOption),
+          ),
           const Divider(height: 24),
-          _buildSummaryRow('Expires On', expiresOn),
+          _buildSummaryRow(
+            'Expires On',
+            formatDate(objShareRespnse?.expiresAt ?? DateTime.now()),
+          ),
         ],
       ),
     );
@@ -716,18 +754,23 @@ class _ShareScreenState extends State<ShareScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label,
-              style: GoogleFonts.inter(
-                  fontSize: 14, color: Colors.grey.shade600)),
+          Text(
+            label,
+            style: GoogleFonts.inter(fontSize: 14, color: Colors.grey.shade600),
+          ),
           Row(
             children: [
               if (icon != null) ...[
                 Icon(icon, size: 16, color: Colors.grey.shade600),
                 const SizedBox(width: 8),
               ],
-              Text(value,
-                  style: GoogleFonts.inter(
-                      fontSize: 14, fontWeight: FontWeight.w600)),
+              Text(
+                value,
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ],
           ),
         ],
@@ -739,9 +782,10 @@ class _ShareScreenState extends State<ShareScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Share Document With',
-            style: GoogleFonts.inter(
-                fontSize: 16, fontWeight: FontWeight.w600)),
+        Text(
+          'Share Document With',
+          style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600),
+        ),
         const SizedBox(height: 12),
         TextField(
           controller: _shareWithController,
@@ -761,8 +805,7 @@ class _ShareScreenState extends State<ShareScreen> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide:
-              BorderSide(color: ColorUtils.fromHex("#5A48F5")),
+              borderSide: BorderSide(color: ColorUtils.fromHex("#5A48F5")),
             ),
             counterText: '',
           ),
@@ -772,8 +815,7 @@ class _ShareScreenState extends State<ShareScreen> {
           alignment: Alignment.centerRight,
           child: Text(
             '${_shareWithController.text.length}/50',
-            style: GoogleFonts.inter(
-                fontSize: 12, color: Colors.grey.shade500),
+            style: GoogleFonts.inter(fontSize: 12, color: Colors.grey.shade500),
           ),
         ),
       ],
@@ -786,7 +828,7 @@ class _ShareScreenState extends State<ShareScreen> {
   }
 
   String _getProtectionOptionString(ProtectionOption? option) {
-    return option == ProtectionOption.otp ? 'OTP Protected' : 'Without OTP';
+    return option == ProtectionOption.pin ? 'Generate PIN' : 'Without PIN';
   }
 
   String _getPermissionOptionString(PermissionOption? option) {
@@ -796,17 +838,20 @@ class _ShareScreenState extends State<ShareScreen> {
   }
 
   // ---------- COMMON WIDGETS ----------
-  Widget _buildInfoBox(
-      {required IconData icon,
-        required String text,
-        bool isBlue = false}) {
+  Widget _buildInfoBox({
+    required IconData icon,
+    required String text,
+    bool isBlue = false,
+  }) {
     final Color bgColor = isBlue
         ? ColorUtils.fromHex("#EFF6FF")
         : ColorUtils.fromHex("#EEF2FF");
-    final Color iconColor =
-    isBlue ? ColorUtils.fromHex("#3B82F6") : ColorUtils.fromHex("#5A48F5");
-    final Color textColor =
-    isBlue ? ColorUtils.fromHex("#1E40AF") : ColorUtils.fromHex("#4F46E5");
+    final Color iconColor = isBlue
+        ? ColorUtils.fromHex("#3B82F6")
+        : ColorUtils.fromHex("#5A48F5");
+    final Color textColor = isBlue
+        ? ColorUtils.fromHex("#1E40AF")
+        : ColorUtils.fromHex("#4F46E5");
     return Container(
       padding: const EdgeInsets.all(12.0),
       decoration: BoxDecoration(
@@ -821,9 +866,10 @@ class _ShareScreenState extends State<ShareScreen> {
             child: Text(
               text,
               style: GoogleFonts.inter(
-                  fontSize: 14,
-                  color: textColor,
-                  fontWeight: FontWeight.w500),
+                fontSize: 14,
+                color: textColor,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
         ],
@@ -840,27 +886,27 @@ class _ShareScreenState extends State<ShareScreen> {
           child: ElevatedButton(
             onPressed: _shareWithController.text.isNotEmpty
                 ? () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const SharedDocListScreen(),
-                ),
-              );
-            }
+                    apicall_put_shareWithName(context);
+                  }
                 : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: ColorUtils.fromHex("#5A48F5"),
-              disabledBackgroundColor:
-              ColorUtils.fromHex("#5A48F5").withOpacity(0.5),
+              disabledBackgroundColor: ColorUtils.fromHex(
+                "#5A48F5",
+              ).withOpacity(0.5),
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
-            child: Text('Share Document',
-                style: GoogleFonts.inter(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white)),
+            child: Text(
+              'Share Document',
+              style: GoogleFonts.inter(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
+            ),
           ),
         ),
       );
@@ -868,9 +914,9 @@ class _ShareScreenState extends State<ShareScreen> {
 
     bool canContinue =
         (_currentStep == 0 && _selectedOption != null) ||
-            (_currentStep == 1 && _selectedProtectionOption != null) ||
-            (_currentStep == 2 && _selectedDurationOption != null) ||
-            (_currentStep == 3 && _selectedPermissionOption != null);
+        (_currentStep == 1 && _selectedProtectionOption != null) ||
+        (_currentStep == 2 && _selectedDurationOption != null) ||
+        (_currentStep == 3 && _selectedPermissionOption != null);
 
     return Padding(
       padding: const EdgeInsets.all(24.0),
@@ -879,49 +925,87 @@ class _ShareScreenState extends State<ShareScreen> {
         child: ElevatedButton(
           onPressed: canContinue
               ? () {
-            setState(() {
-              if (_currentStep < 3) {
-                _currentStep++;
-              } else {
-                _isFlowComplete = true;
-              }
-            });
-          }
+                  setState(() {
+                    if (_currentStep < 3) {
+                      _currentStep++;
+                    } else {
+                      apicall_shareIDGenerate(context);
+                    }
+                  });
+                }
               : null,
           style: ElevatedButton.styleFrom(
             backgroundColor: ColorUtils.fromHex("#5A48F5"),
-            disabledBackgroundColor:
-            const Color.fromRGBO(160, 148, 245, 0.5),
+            disabledBackgroundColor: const Color.fromRGBO(160, 148, 245, 0.5),
             padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12)),
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
-          child: Text('Continue',
-              style: GoogleFonts.inter(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white)),
+          child: Text(
+            'Continue',
+            style: GoogleFonts.inter(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Future<void> fetchSchemes(BuildContext context) async {
+  Future<void> apicall_shareIDGenerate(BuildContext context) async {
     // _isLoading = true;
     // _errorMessage = '';
     // notifyListeners();
+    String customExpiry = DateTime.now().toUtc().toIso8601String();
+    String expiresIn = '';
+    if (_selectedDurationOption == DurationOption.custom) {
+      expiresIn = 'custom';
+      customExpiry = _customExpiryDate!.toUtc().toIso8601String();
+    } else if (_selectedDurationOption == DurationOption.fifteenMin) {
+      expiresIn = '15m';
+    } else if (_selectedDurationOption == DurationOption.oneHour) {
+      expiresIn = '1h';
+    } else if (_selectedDurationOption == DurationOption.twentyFourHours) {
+      expiresIn = '24h';
+    }
+
+    var reqBody = {
+      "shareMethod": _selectedOption == ShareOption.qr ? "qr" : "link",
+      "protectionType": _selectedProtectionOption == ProtectionOption.pin
+          ? "pin"
+          : "withoutpin", // "none",
+      "canDownload": _selectedPermissionOption == PermissionOption.viewOnly
+          ? false
+          : true,
+      "expiresIn": expiresIn, //"24h",
+      "customExpiry": customExpiry, //"2026-01-12T08:00:55.182Z",
+      // "sharedWithName": _shareWithController.text,
+    };
 
     try {
       final apiService = context.read<ApiService>();
 
-      final Map<String, dynamic> response = await apiService.getRequest(
+      final Map<String, dynamic> response = await apiService.postRequest(
         AppConstants.shareDocumentEndpoint(widget.documentId),
         includeAuth: true,
+        body: reqBody,
       );
 
       if (response['success'] == true && response['data'] != null) {
         final Map<String, dynamic> decodedData = response;
         print(decodedData);
+        final objShareResponseModel = ShareResponseModel.fromJson(
+          response['data'],
+        );
+
+        setState(() {
+          objShareRespnse = objShareResponseModel;
+          reqParams = reqBody;
+          _isFlowComplete = true;
+        });
       } else {
         String errorMessage = response['message'] ?? 'Something went wrong';
         Fluttertoast.showToast(msg: errorMessage);
@@ -937,4 +1021,129 @@ class _ShareScreenState extends State<ShareScreen> {
     }
   }
 
+  Future<void> apicall_put_shareWithName(BuildContext context) async {
+    String shareID = objShareRespnse?.shareId ?? "";
+    reqParams["sharedWithName"] = _shareWithController.text;
+    try {
+      final apiService = context.read<ApiService>();
+      final Map<String, dynamic> response = await apiService.putRequest(
+        AppConstants.editShareDocumentEndpoint(shareID),
+        includeAuth: true,
+        body: reqParams,
+      );
+      if (response['success'] == true && response['data'] != null) {
+        final Map<String, dynamic> responseData = response;
+       ShareResponseModel model = ShareResponseModel.fromJson(responseData["data"]);
+        if (model.qrCode != null) {
+          File objFile = await base64ToImageFile(model.qrCode ?? "");
+          var result = await SharePlus.instance.share(
+            ShareParams(files: [XFile(objFile.path)]),
+          );
+        } else {
+          var result = await SharePlus.instance.share(
+            ShareParams(text:model.shareUrl),
+          );
+          print("result ${result.status}");
+          // This executes AFTER share sheet is closed
+          if (result.status == ShareResultStatus.success ||
+              result.status == ShareResultStatus.dismissed) {
+
+            if (context.mounted) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>  SharedDocListScreen(),
+                ),
+              );
+            }
+          }
+        }
+      } else {
+        String errorMessage = response['message'] ?? 'Something went wrong';
+        Fluttertoast.showToast(msg: errorMessage);
+      }
+    } on NoInternetException catch (e) {
+      Fluttertoast.showToast(msg: '${e.toString()}');
+    } catch (e) {
+      debugPrint('Fetch Error: $e');
+      Fluttertoast.showToast(msg: '${e.toString()}');
+    } finally {
+      // _isLoading = false;
+      // notifyListeners();
+    }
+  }
+
+  String formatDate(DateTime isoDate) {
+    final localDate = isoDate.toLocal();     // IST
+    return DateFormat("dd MMM yyyy . hh:mm a").format(localDate);
+  }
+
+  Future<File> base64ToImageFile(String base64Data) async {
+    // Remove data:image/...;base64, if present
+    final cleanBase64 = base64Data.contains(',')
+        ? base64Data.split(',').last
+        : base64Data;
+
+    final bytes = base64Decode(cleanBase64);
+
+    final tempDir = await getTemporaryDirectory();
+    final file = File('${tempDir.path}/shared_qr.png');
+
+    await file.writeAsBytes(bytes);
+    return file;
+  }
+}
+
+class ShareResponseModel {
+  final String shareId;
+  final String shareToken;
+  final String shareUrl;
+  final String protectionType;
+  final String? pin;
+  final bool canDownload;
+  final DateTime expiresAt;
+  final String sharedWithName;
+  final String? qrCode;
+
+  ShareResponseModel({
+    required this.shareId,
+    required this.shareToken,
+    required this.shareUrl,
+    required this.protectionType,
+    this.pin,
+    required this.canDownload,
+    required this.expiresAt,
+    required this.sharedWithName,
+    this.qrCode,
+  });
+
+  // ---------- FROM JSON ----------
+  factory ShareResponseModel.fromJson(Map<String, dynamic> json) {
+    return ShareResponseModel(
+      shareId: json['shareId'] as String,
+      shareToken: json['shareToken'] as String,
+      shareUrl: json['shareUrl'] as String,
+      protectionType: json['protectionType'] as String,
+      pin: json['pin']?.toString(),
+      canDownload: json['canDownload'] as bool,
+      expiresAt: DateTime.parse(json['expiresAt']),
+      sharedWithName: json['sharedWithName'] as String,
+      qrCode: json['qrCode']?.toString(),
+    );
+  }
+
+  // ---------- TO JSON ----------
+  Map<String, dynamic> toJson() {
+    return {
+      'shareId': shareId,
+      'shareToken': shareToken,
+      'shareUrl': shareUrl,
+      'protectionType': protectionType,
+      'pin': pin,
+      'canDownload': canDownload,
+      'expiresAt': expiresAt.toUtc().toIso8601String(),
+      'sharedWithName': sharedWithName,
+      'qrCode': qrCode,
+    };
+  }
 }

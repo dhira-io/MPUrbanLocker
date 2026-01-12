@@ -333,15 +333,15 @@ class _DocumentPreviewState extends State<DocumentPreview> {
         Expanded(
           child: OutlinedButton.icon(
             onPressed: () {
-              // Navigator.push(
-              //   context,
-              //   MaterialPageRoute(
-              //     builder: (context) => ShareScreen(
-              //       documentTitle: widget.title,
-              //       documentId: widget.docId,
-              //     ),
-              //   ),
-              // );
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ShareScreen(
+                    documentTitle: widget.title,
+                    documentId: widget.docId,
+                  ),
+                ),
+              );
             },
             icon: const Icon(Icons.share),
             label: const Text('Share Document'),

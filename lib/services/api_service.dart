@@ -289,6 +289,31 @@ print(body);
     }
   }
 
+  Future<Map<String, dynamic>> putRequest(
+      String endpoint, {
+        bool includeAuth = true,
+        Map<String, dynamic>? body,
+      }) async {
+    try {
+      await _checkInternet();
+      print('$baseUrl$endpoint');
+      print(body);
+      final response = await _client
+          .put(
+        Uri.parse('$baseUrl$endpoint'),
+        headers: await _getHeaders(includeAuth: includeAuth),
+        body: jsonEncode(body ?? {}),
+      )
+          .timeout(const Duration(seconds: 30));
+
+      return await _handleResponse(response);
+    } on NoInternetException {
+      rethrow;
+    } on Exception catch (e) {
+      throw ApiException(e.toString());
+    }
+  }
+
   Future<Map<String, dynamic>> getRequest(
     String endpoint, {
     bool includeAuth = true,

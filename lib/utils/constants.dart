@@ -1,6 +1,6 @@
 class AppConstants {
   // API Configuration
-  static const String baseUrl =  'https://0w5c7rsr-3001.inc1.devtunnels.ms';//
+  static const String baseUrl = 'https://bktc4594-3001.inc1.devtunnels.ms';// 'https://0w5c7rsr-3001.inc1.devtunnels.ms';//
   //'https://dev.uatenagarpalika.in:5443'; //'https://mpurbanlocker.in'; // ;
     // 'https://fqstnlh6-3001.inc1.devtunnels.ms'; // Android emulator localhost
 
@@ -38,6 +38,8 @@ class AppConstants {
 
   static String shareDocumentEndpoint(String docId) =>
       '/api/shares/documents/$docId';
+  static String editShareDocumentEndpoint(String docId) =>
+      '/api/shares/$docId';
   // User endpoints
   static const String userProfileEndpoint = '/api/users/me/profile';
 
