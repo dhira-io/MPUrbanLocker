@@ -493,6 +493,8 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
           ),
         ),
 */
+        const SizedBox(height: 20),
+
         // 4. Quick Actions Grid
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1172,15 +1174,24 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
               children: [
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    "Version 1.0.0",
-                    style: GoogleFonts.inter(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w400,
-                      color: Color(0xff9CA3AF),
-                    ),
+                  child: FutureBuilder<String>(
+                    future: AppVersion().getAppVersion(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return const SizedBox(); // or loader
+                      }
+
+                      return Text(
+                        "Version ${snapshot.data}",
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                          color: ColorUtils.fromHex("#9CA3AF"),
+                        ),
+                      );
+                    },
                   ),
-                ),
+                )
               ],
             ),
           ],
@@ -1222,7 +1233,14 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
             Icons.qr_code_scanner,
             color: ColorUtils.fromHex("#212121"),
           ),
-          onPressed: () {},
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => ComingSoonScreen(docType: "Activity Log"),
+              ),
+            );
+          },
         ),
         Builder(
           builder: (context) => IconButton(
@@ -1665,12 +1683,15 @@ class CategoryCard extends StatelessWidget {
           children: [
             Expanded(
               flex: 5,
-              child: Container(
-                alignment: Alignment.bottomCenter,
-                child: CircleAvatar(
-                  radius: 28,
-                  backgroundColor: bgColor,
-                  child: image,
+              child: Padding(
+                padding:  EdgeInsets.only(bottom: 8),
+                child: Container(
+                  alignment: Alignment.bottomCenter,
+                  child: CircleAvatar(
+                    radius: 28,
+                    backgroundColor: bgColor,
+                    child: image,
+                  ),
                 ),
               ),
             ),

@@ -146,7 +146,9 @@ class _DocumentPreviewState extends State<DocumentPreview> {
     try {
       final pref = await SharedPreferences.getInstance();
       final userId = await pref.getString(AppConstants.userIdKey) ?? '';
-      final fileName = '${widget.title}_$userId'.replaceAll('/', '').replaceAll(' ', '');
+      final fileName = '${widget.title}_$userId'
+          .replaceAll('/', '')
+          .replaceAll(' ', '');
 
       await _saveToDownloads(bytesOfDoc!, fileName);
     } catch (e) {
@@ -334,7 +336,10 @@ class _DocumentPreviewState extends State<DocumentPreview> {
               // Navigator.push(
               //   context,
               //   MaterialPageRoute(
-              //     builder: (context) => ShareScreen(documentTitle: widget.title),
+              //     builder: (context) => ShareScreen(
+              //       documentTitle: widget.title,
+              //       documentId: widget.docId,
+              //     ),
               //   ),
               // );
             },

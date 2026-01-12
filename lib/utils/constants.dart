@@ -36,7 +36,8 @@ class AppConstants {
   static const String userDocumentsEndpoint = '/api/users/me/documents';
 
 
-
+  static String shareDocumentEndpoint(String docId) =>
+      '/api/shares/documents/$docId';
   // User endpoints
   static const String userProfileEndpoint = '/api/users/me/profile';
 

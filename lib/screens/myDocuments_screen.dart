@@ -10,6 +10,7 @@ import '../providers/onboarding_provider.dart';
 import '../services/config_service.dart';
 import '../utils/color_utils.dart';
 import 'CreateDocumentForm.dart';
+import 'category_wise_doc_list_screen.dart';
 
 class MyDocumentsScreen extends StatefulWidget {
   MyDocumentsScreen({super.key});
@@ -179,26 +180,37 @@ class _MyDocumentsScreenState extends State<MyDocumentsScreen> {
 
   Widget _categoryCard(String title, IconData icon) {
     return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 20),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          children: [
-            CircleAvatar(
-              backgroundColor: Colors.deepPurple.shade50,
-              radius: 26,
-              child: Icon(icon, color: Colors.deepPurple),
+      child: InkWell(
+        onTap: (){
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) =>
+                  CategoryWiseDocListScreen(),
             ),
-            const SizedBox(height: 12),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
-            ),
-          ],
+          );
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            children: [
+              CircleAvatar(
+                backgroundColor: Colors.deepPurple.shade50,
+                radius: 26,
+                child: Icon(icon, color: Colors.deepPurple),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+              ),
+            ],
+          ),
         ),
       ),
     );

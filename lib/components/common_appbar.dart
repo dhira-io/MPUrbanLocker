@@ -3,6 +3,7 @@ import 'package:digilocker_flutter/screens/FAQScreen.dart';
 import 'package:digilocker_flutter/screens/NotificationScreen.dart';
 import 'package:digilocker_flutter/screens/PrivacyPolicyScreen.dart';
 import 'package:digilocker_flutter/screens/TermsConditionScreen.dart';
+import 'package:digilocker_flutter/screens/comingsoon_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -48,10 +49,10 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         IconButton(
           icon: const Icon(Icons.qr_code_scanner, color: Colors.black),
           onPressed: () {
-            // Navigator.push(
-            //   context,
-            //   MaterialPageRoute(builder: (_) => NotificationScreen()),
-            // );
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => ComingSoonScreen(docType: "QR Scan")),
+            );
           },
         ),
         Builder(
@@ -129,10 +130,14 @@ Widget customEndDrawer(BuildContext context) {
                 fontSize: 14,
                 fontWeight: FontWeight.w400,
                 color: ColorUtils.fromHex("#4B5563")
-            ),),
+            ),
+            ),
             trailing: Icon(Icons.arrow_forward_ios,size: 16,color: ColorUtils.fromHex("#9CA3AF"),),
             visualDensity: VisualDensity(vertical: -3),
-            onTap: () => Navigator.pop(context),
+            onTap: () =>   Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => ComingSoonScreen(docType: "Documents Drive")),
+            ),
           ),
           Divider(color: Color(0xffDDDDDD)),
           ListTile(
@@ -144,7 +149,10 @@ Widget customEndDrawer(BuildContext context) {
             ),),
             trailing: Icon(Icons.arrow_forward_ios,size: 16,color: ColorUtils.fromHex("#9CA3AF"),),
             visualDensity: VisualDensity(vertical: -2),
-            onTap: () => Navigator.pop(context),
+            onTap: () =>  Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => ComingSoonScreen(docType: "Settings")),
+            ),
           ),
           Divider(color: Color(0xffDDDDDD)),
           ListTile(
@@ -156,7 +164,10 @@ Widget customEndDrawer(BuildContext context) {
             ),),
             trailing: Icon(Icons.arrow_forward_ios,size: 16,color: ColorUtils.fromHex("#9CA3AF"),),
             visualDensity: VisualDensity(vertical: -1),
-            onTap: () => Navigator.pop(context),
+            onTap: () =>  Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => ComingSoonScreen(docType: "Validate Certificate")),
+            ),
           ),
           Divider(color: Color(0xffDDDDDD)),
           ListTile(
@@ -167,7 +178,10 @@ Widget customEndDrawer(BuildContext context) {
                 color: ColorUtils.fromHex("#4B5563")
             ),),
             trailing: Icon(Icons.arrow_forward_ios,size: 16,color: ColorUtils.fromHex("#9CA3AF"),),
-            onTap: () => Navigator.pop(context),
+            onTap: () =>Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => ComingSoonScreen(docType: "Activity Log")),
+            ),
           ),
           Divider(color: Color(0xffDDDDDD)),
           ListTile(
@@ -178,7 +192,10 @@ Widget customEndDrawer(BuildContext context) {
                 color: ColorUtils.fromHex("#4B5563")
             ),),
             trailing: Icon(Icons.arrow_forward_ios,size: 16,color: ColorUtils.fromHex("#9CA3AF"),),
-            onTap: () => Navigator.pop(context),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => ComingSoonScreen(docType: "Contact Support")),
+            ),
           ),
           Divider(color: Color(0xffDDDDDD)),
           Padding(
@@ -262,8 +279,25 @@ Widget customEndDrawer(BuildContext context) {
               Divider(color: Color(0xffDDDDDD)),
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Text("Version 1.0.0",style:GoogleFonts.inter(fontSize: 12,fontWeight: FontWeight.w400, color: ColorUtils.fromHex("#9CA3AF")),
-              ))
+                child: FutureBuilder<String>(
+                  future: AppVersion().getAppVersion(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const SizedBox(); // or loader
+                    }
+
+                    return Text(
+                      "Version ${snapshot.data}",
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                        color: ColorUtils.fromHex("#9CA3AF"),
+                      ),
+                    );
+                  },
+                ),
+              )
+
             ],
           ),
         ],

@@ -1,5 +1,6 @@
 import 'package:digilocker_flutter/screens/shared_doc_list_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
@@ -12,8 +13,9 @@ import '../utils/constants.dart';
 
 class ShareScreen extends StatefulWidget {
   final String documentTitle;
+  final String documentId;
 
-  const ShareScreen({Key? key, required this.documentTitle}) : super(key: key);
+  const ShareScreen({Key? key, required this.documentTitle,required this.documentId}) : super(key: key);
 
   @override
   _ShareScreenState createState() => _ShareScreenState();
@@ -904,39 +906,35 @@ class _ShareScreenState extends State<ShareScreen> {
     );
   }
 
-  // Future<void> fetchSchemes(BuildContext context) async {
-  //   // _isLoading = true;
-  //   // _errorMessage = '';
-  //   // notifyListeners();
-  //
-  //   try {
-  //     final apiService = context.read<ApiService>();
-  //
-  //     final Map<String, dynamic> response = await apiService.getRequest(
-  //       AppConstants.schemeMatchesEndpoint,
-  //       includeAuth: true,
-  //     );
-  //
-  //     if (response['success'] == true && response['data'] != null) {
-  //       final Map<String, dynamic> decodedData = response;
-  //       final schemeResponse = SchemeResponse.fromJson(decodedData);
-  //       _allSchemes = schemeResponse.matches; // store original
-  //       _schemes = _allSchemes;
-  //     } else {
-  //       _errorMessage = response['message'] ?? 'Something went wrong';
-  //       Fluttertoast.showToast(msg: _errorMessage);
-  //     }
-  //   } on NoInternetException catch (e) {
-  //     _errorMessage = e.toString();
-  //     Fluttertoast.showToast(msg: _errorMessage);
-  //   } catch (e) {
-  //     _errorMessage = 'Failed to load schemes';
-  //     debugPrint('Fetch Error: $e');
-  //     Fluttertoast.showToast(msg: _errorMessage);
-  //   } finally {
-  //     _isLoading = false;
-  //     notifyListeners();
-  //   }
-  // }
+  Future<void> fetchSchemes(BuildContext context) async {
+    // _isLoading = true;
+    // _errorMessage = '';
+    // notifyListeners();
+
+    try {
+      final apiService = context.read<ApiService>();
+
+      final Map<String, dynamic> response = await apiService.getRequest(
+        AppConstants.shareDocumentEndpoint(widget.documentId),
+        includeAuth: true,
+      );
+
+      if (response['success'] == true && response['data'] != null) {
+        final Map<String, dynamic> decodedData = response;
+        print(decodedData);
+      } else {
+        String errorMessage = response['message'] ?? 'Something went wrong';
+        Fluttertoast.showToast(msg: errorMessage);
+      }
+    } on NoInternetException catch (e) {
+      Fluttertoast.showToast(msg: '${e.toString()}');
+    } catch (e) {
+      debugPrint('Fetch Error: $e');
+      Fluttertoast.showToast(msg: '${e.toString()}');
+    } finally {
+      // _isLoading = false;
+      // notifyListeners();
+    }
+  }
 
 }

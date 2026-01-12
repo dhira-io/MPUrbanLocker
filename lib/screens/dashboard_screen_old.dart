@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../models/doc_service_config.dart';
 import '../providers/auth_provider.dart';
 import '../providers/onboarding_provider.dart';
 import '../services/api_service.dart';
@@ -103,12 +104,14 @@ class CategoryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(15.0),
+      borderRadius: BorderRadius.circular(10.0),
       child: Container(
-        width: 160,
+        alignment: Alignment.center,
+        width: 140,
+        height: 140,
         // Fixed width for horizontal scroll
         margin: const EdgeInsets.symmetric(horizontal: 4.0),
-        padding: const EdgeInsets.all(12.0),
+        //padding: const EdgeInsets.all(12.0),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(15.0),
@@ -122,26 +125,55 @@ class CategoryCard extends StatelessWidget {
           ],
         ),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            CircleAvatar(
-              radius: 28,
-              backgroundColor: bgColor,
-              child: image,
-            ),
-
-            const SizedBox(height: 8),
-            SizedBox(
-              height: 38,
-              child: Text(
-                title,
-                textAlign: TextAlign.center,
-                style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500,color: ColorUtils.fromHex("#4B5563")),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+            Expanded(
+              flex: 5,
+              child: Padding(
+                padding:  EdgeInsets.only(bottom: 8),
+                child: Container(
+                  alignment: Alignment.bottomCenter,
+                  child: CircleAvatar(
+                    radius: 28,
+                    backgroundColor: bgColor,
+                    child: image,
+                  ),
+                ),
               ),
             ),
-            SizedBox(height: 5)
+            Expanded(
+              flex: 3,
+              child: Container(
+                child: Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: ColorUtils.fromHex("#4B5563"),
+                  ),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
+
+            // const SizedBox(height: 10),
+            // CircleAvatar(radius: 28, backgroundColor: bgColor, child: image),
+            // const SizedBox(height: 4),
+            // Text(
+            //   title,
+            //   textAlign: TextAlign.center,
+            //   style: GoogleFonts.inter(
+            //     fontSize: 12,
+            //     fontWeight: FontWeight.w600,
+            //     color: ColorUtils.fromHex("#4B5563"),
+            //   ),
+            //   maxLines: 3,
+            //   overflow: TextOverflow.ellipsis,
+            // ),
+            // const SizedBox(height: 10),
           ],
         ),
       ),
@@ -219,25 +251,25 @@ class DashboardScreen_old extends StatefulWidget {
 
 class _DashboardScreen_oldState extends State<DashboardScreen_old> {
   bool _isNavigating = false; // Prevent multiple rapid clicks
+  // --- Search functionality ---
+  final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode(); // To track search bar focus
+  List<DocServiceConfig> _filteredServices = [];
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: CustomAppBar(),
-      body: ListView(
-        children: [
-          _buildSearchBar(),
 
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: _buildBanner(context, ''),
-          ),
+  Widget _buildMainContent() {
+    return ListView(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: _buildBanner(context, ''),
+        ),
 
-          const SizedBox(height: 20),
+        const SizedBox(height: 20),
 
-          _buildSectionHeader(title: 'Documents you might need'),
-          _buildDocumentsList(context),
-          const SizedBox(height: 20),
+        _buildSectionHeader(title: 'Documents you might need'),
+        _buildDocumentsList(context),
+        const SizedBox(height: 20),
 
         //  _buildSectionHeader(title: 'State-wide statistics'),
         Padding(
@@ -250,33 +282,73 @@ class _DashboardScreen_oldState extends State<DashboardScreen_old> {
             ],
           ),
         ),
-          _buildStatisticsRow(context),
-          const SizedBox(height: 20),
+        _buildStatisticsRow(context),
+        const SizedBox(height: 20),
 
-          _buildSectionHeader(title: 'Departments'),
-          _buildDepartmentsGrid(),
-          const SizedBox(height: 20),
+        _buildSectionHeader(title: 'Departments'),
+        _buildDepartmentsGrid(),
+        const SizedBox(height: 20),
 
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: _buildBanner(context, 'New in MP Urban Locker'),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: _buildBanner(context, 'New in MP Urban Locker'),
+        ),
+
+        const SizedBox(height: 20),
+
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(child: Text("About MP Urban Locker", style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600))),
+
+            ],
           ),
+        ),
+        _buildAboutButtonsRow(context),
 
-          const SizedBox(height: 20),
+        const SizedBox(height: 30),
+      ],
+    );
+  }
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    // Initialize with an empty list for suggestions
+    _filteredServices = [];
 
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    // Add listeners for search and focus changes
+    _searchController.addListener(_onSearchChanged);
+    _searchFocusNode.addListener(_onFocusChange);
+  }
+    @override
+  Widget build(BuildContext context) {
+            // Determine if the suggestion list should be visible
+      final bool showSuggestions =
+          _searchFocusNode.hasFocus && _searchController.text.isNotEmpty;
+    return Scaffold(
+      appBar: CustomAppBar(),
+      body: Column(
+        children: [
+          _buildSearchBar(),
+          // 2. The rest of the page is a Stack to overlay suggestions
+          Expanded(
+            child: Stack(
               children: [
-                Flexible(child: Text("About MP Urban Locker", style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600))),
+                // The main content is visible only when not showing suggestions
+                Visibility(
+                  visible: !showSuggestions,
+                  maintainState: true, // Keep the state of the list
+                  child: _buildMainContent(),
+                ),
 
+                // Show the suggestions list when searching
+                if (showSuggestions) _buildSuggestionsList(context),
               ],
             ),
           ),
-          _buildAboutButtonsRow(context),
-
-          const SizedBox(height: 30),
         ],
       ),
       bottomNavigationBar: SafeArea(
@@ -310,45 +382,133 @@ class _DashboardScreen_oldState extends State<DashboardScreen_old> {
       endDrawer: customEndDrawer(context),
     );
   }
-
-  Widget _buildSearchBar() {
+  // --- Builds the search suggestions list ---
+  Widget _buildSuggestionsList(BuildContext ctxt) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(10.0),
-        border: Border.all(color: Colors.grey[200]!),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.search, color: ColorUtils.fromHex("#212121")),
-          const SizedBox(width: 8),
-          Expanded(
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'Search for',
-                border: InputBorder.none,
-                isDense: true,
+      color: Colors.white,
+      child: ListView.separated(
+        itemCount: _filteredServices.length,
+        separatorBuilder: (context, index) => Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: const Divider(
+            color: Color(0xffDDDDDD),
+            height: 1,
+            thickness: 1,
+          ),
+        ),
+        itemBuilder: (context, index) {
+          final service = _filteredServices[index];
+
+          return ListTile(
+            leading: CircleAvatar(
+              radius: 28,
+              backgroundColor: service.bgcolor,
+              child: Image.asset(service.imagePath),
+            ),
+            title: Text(
+              service.displayName,
+              style: GoogleFonts.inter(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
               ),
             ),
-          ),
-          Container(
-            width: 30,
-            height: 30,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.grey[400]!),
-              color: Colors.blue[50],
-            ),
-            child: Image.asset('assets/s_icon.png'),
-          ),
-          const SizedBox(width: 8),
-          const Icon(Icons.mic, color: Colors.grey),
-        ],
+            onTap: () {
+              _searchController.clear();
+              _searchFocusNode.unfocus();
+              _isNavigating ? null : _navigateToDigiLockerAuth(ctxt, 'search');
+
+
+            },
+          );
+        },
       ),
     );
   }
+
+  @override
+  void dispose() {
+    _searchController.removeListener(_onSearchChanged);
+    _searchController.dispose();
+    _searchFocusNode.removeListener(_onFocusChange);
+    _searchFocusNode.dispose();
+    super.dispose();
+  }
+  // --- Search and Focus Handlers ---
+  void _onFocusChange() {
+    // Rebuild the UI when focus changes to show or hide suggestions
+    setState(() {});
+  }
+  void _onSearchChanged() {
+    final query = _searchController.text.toLowerCase();
+    setState(() {
+      if (query.isEmpty) {
+        _filteredServices = []; // Clear suggestions if search is empty
+      } else {
+        // Filter services based on the search query for suggestions
+        _filteredServices = ConfigService.docServices.where((service) {
+          return service.displayName.toLowerCase().contains(query);
+        }).toList();
+      }
+    });
+  }
+  Widget _buildSearchBar() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10.0),
+        border: Border.all(color: Colors.grey[200]!),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 5,
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          children: [
+            Icon(Icons.search, color: ColorUtils.fromHex("#212121")),
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8.0),
+                child: TextField(
+                  controller: _searchController,
+                  focusNode: _searchFocusNode, // Assign the focus node
+                  decoration: InputDecoration(
+                    hintText: 'Search for documents...',
+                    border: InputBorder.none,
+                    isDense: true,
+                    hintStyle: GoogleFonts.inter(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w400,
+                      color: ColorUtils.fromHex("#2121217A"),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Container(
+              width: 30,
+              height: 30,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.grey[400]!),
+                color: Colors.blue[50],
+              ),
+              child: Image.asset('assets/s_icon.png'),
+            ),
+            const SizedBox(width: 8),
+            Icon(Icons.mic, color: ColorUtils.fromHex("#212121")),
+          ],
+        ),
+      ),
+    );
+  }
+
 
   Widget _buildSectionHeader({required String title}) {
     return Padding(
@@ -535,6 +695,8 @@ class _DashboardScreen_oldState extends State<DashboardScreen_old> {
                   image: Image.asset('assets/appartment.png'),
                   iconColor: const Color(0xFF673AB7),
                   title: 'Urban Administration & development Department',
+                  onTap:(){_navigateToDigiLockerAuth(context, "Department");}
+                  ,
                 ),
               ),
             ],

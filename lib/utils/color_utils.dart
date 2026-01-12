@@ -1,5 +1,7 @@
 import 'dart:ui';
 
+import 'package:package_info_plus/package_info_plus.dart';
+
 
 
 class ColorUtils {
@@ -9,4 +11,12 @@ class ColorUtils {
     buffer.write(hexString.replaceFirst('#', ''));
     return Color(int.parse(buffer.toString(), radix: 16));
   }
+}
+class AppVersion {
+  Future<String> getAppVersion() async {
+   final packageInfo = await PackageInfo.fromPlatform();
+   final String appVersion = packageInfo.version;
+   return appVersion;
+  }
+
 }
