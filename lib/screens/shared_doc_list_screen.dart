@@ -200,14 +200,12 @@ class _SharedDocumentListsView extends StatelessWidget {
             flex: 3,
             child: Container(
               alignment: Alignment.centerRight,
-              child: Flexible(
-                child: Text(
-                  value,
-                  style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
-                  softWrap: true,
-                  textAlign: TextAlign.right,
+              child: Text(
+                value,
+                style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
+                softWrap: true,
+                textAlign: TextAlign.right,
 
-                ),
               ),
             ),
           ),
