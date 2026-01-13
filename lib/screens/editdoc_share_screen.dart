@@ -81,7 +81,7 @@ class _EditShareDetailsScreenState extends State<EditShareDetailsScreen> {
     return Row(
       children: [
         IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back_ios),
           onPressed: () => Navigator.of(context).pop(),
         ),
         Flexible(
@@ -258,6 +258,9 @@ class _EditShareDetailsScreenState extends State<EditShareDetailsScreen> {
                       child: Text(
                         DateFormat('d MMM yyyy, hh:mm a').format(value),
                         style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+                        softWrap: true,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     const Icon(Icons.arrow_drop_down, color: Colors.grey),
