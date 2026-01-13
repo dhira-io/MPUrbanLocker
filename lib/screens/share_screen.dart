@@ -88,7 +88,7 @@ class _ShareScreenState extends State<ShareScreen> {
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.arrow_back),
+            icon: const Icon(Icons.arrow_back_ios),
             onPressed: () {
               if (_isFlowComplete) {
                 setState(() {
