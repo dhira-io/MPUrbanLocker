@@ -24,6 +24,7 @@ class _SharedDocumentListsView extends StatelessWidget {
   const _SharedDocumentListsView();
 
   @override
+  @override
   Widget build(BuildContext context) {
     final provider = context.watch<SharedDocListProvider>();
 
@@ -38,11 +39,37 @@ class _SharedDocumentListsView extends StatelessWidget {
             _header(context),
             _searchBar(),
             const SizedBox(height: 16),
+
             Expanded(
-              child: ListView.builder(
-                itemCount: provider.documents.length,
-                itemBuilder: (context, index) {
-                  return _documentItem(context, provider, index);
+              child: Builder(
+                builder: (_) {
+                  // 🔄 LOADING STATE
+                  if (provider.isLoading) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+
+                  // 🚫 NO RECORD FOUND
+                  if (provider.documents.isEmpty) {
+                    return const Center(
+                      child: Text(
+                        "No records found",
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    );
+                  }
+
+                  // ✅ DATA LIST
+                  return ListView.builder(
+                    itemCount: provider.documents.length,
+                    itemBuilder: (context, index) {
+                      return _documentItem(context, provider, index);
+                    },
+                  );
                 },
               ),
             ),
