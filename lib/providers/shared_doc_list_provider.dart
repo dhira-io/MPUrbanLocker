@@ -26,11 +26,15 @@ class SharedDocListProvider extends ChangeNotifier {
 
       if (response['success'] == true && response['data'] != null) {
         final List list = response['data']['shares'];
-
+print("count${list.length}");
         documents
           ..clear()
           ..addAll(
-            list.map((e) => SharedDocModel.fromJson(e)).toList(),
+            list
+                .where((e) =>
+                e['isRevoked'] == false)
+                .map((e) => SharedDocModel.fromJson(e))
+                .toList(),
           );
 
         expanded = List.generate(documents.length, (_) => false);
@@ -40,6 +44,46 @@ class SharedDocListProvider extends ChangeNotifier {
       }
     } catch (e) {
       debugPrint('Fetch Error: $e');
+      Fluttertoast.showToast(msg: e.toString());
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> apicall_DeleteSharedDoc(
+      BuildContext context,
+      String id,
+      ) async {
+    print("calll");
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      final apiService = context.read<ApiService>();
+
+      final response = await apiService.deleteRequest(
+        AppConstants.deleteShareEndpoint(id),
+        includeAuth: true,
+      );
+
+      if (response['success'] == true) {
+
+        // 🔥 REMOVE FROM LIST
+        final index = documents.indexWhere((e) => e.id == id);
+
+        if (index != -1) {
+          documents.removeAt(index);
+          expanded.removeAt(index);
+        }
+
+        Fluttertoast.showToast(msg: 'Share removed successfully');
+      } else {
+        errorMessage = response['message'] ?? 'Something went wrong';
+        Fluttertoast.showToast(msg: errorMessage);
+      }
+    } catch (e) {
+      debugPrint('Delete Error: $e');
       Fluttertoast.showToast(msg: e.toString());
     } finally {
       isLoading = false;

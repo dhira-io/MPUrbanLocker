@@ -548,7 +548,8 @@ class _CreateDocumentFormState extends State<CreateDocumentForm> {
           response['data'] != null &&
           response['data']['pdf'] != null) {
         final String base64Pdf = response['data']['pdf'];
-
+        final String docID = response['data']['id'];
+        print("doc idddd -${docID}");
         if (!mounted) return;
 
         Navigator.push(
@@ -557,7 +558,7 @@ class _CreateDocumentFormState extends State<CreateDocumentForm> {
             builder: (_) => DocumentPreview(
               title: widget.docType,
               date: "",
-              docId: "",
+              docId: docID,
               pdfString: base64Pdf,
             ),
           ),
