@@ -17,6 +17,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   // 40.0 (Purple Bar) + 60.0 (White Bar) = 100.0
   Size get preferredSize => const Size.fromHeight(100.0);
+  // Placeholder assets used in AppBar. Ensure these assets exist.
+  final String logoImage = 'assets/logo.png';
+  final String lionImage = 'assets/lion.png';
 
   @override
   Widget build(BuildContext context) {
@@ -93,58 +96,68 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             // --- 2. MAIN APP HEADER (White) ---
             Expanded(
               child: Container(
+                height: 60,
                 color: Colors.white,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
+                child: Stack(
+                  alignment: Alignment.center,
                   children: [
-                    SizedBox(width: 24, height: 40, child: Image.asset("assets/lion.png")),
-                    const SizedBox(width: 8),
-                    SizedBox(
-                      width: 32,
-                      height: 40,
-                      child: Image.asset(
-                        "assets/logo.png",
+                    // Main Row for left & right sides
+                    Row(
+                      children: [
+                        // Left side icons
+                        SizedBox(width: 24, height: 40, child: Image.asset(lionImage)),
+                        const SizedBox(width: 8),
+                        SizedBox(
+                          width: 33,
+                          height: 40,
+                          child: Image.asset(logoImage, color: ColorUtils.fromHex("#613AF5")),
+                        ),
+
+                        Spacer(),
+
+                        // Right side icons
+                        IconButton(
+                          icon: Icon(
+                            Icons.qr_code_scanner,
+                            color: ColorUtils.fromHex("#212121"),
+                          ),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ComingSoonScreen(docType: "Activity Log"),
+                              ),
+                            );
+                          },
+                        ),
+                        const SizedBox(width: 8),
+                        Builder(
+                          builder: (context) => GestureDetector(
+                            onTap: () => Scaffold.of(context).openEndDrawer(),
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey.shade300),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: const Icon(Icons.menu, color: Colors.black, size: 24),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    // Centered title
+                    Text(
+                      'MP Urban Locker',
+                      style: GoogleFonts.inter(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
                         color: ColorUtils.fromHex("#613AF5"),
                       ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        'MP Urban Locker',
-                        style: GoogleFonts.inter(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: ColorUtils.fromHex("#613AF5"),
-                        ),
-                      ),
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        Icons.qr_code_scanner,
-                        color: ColorUtils.fromHex("#212121"),
-                      ),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => ComingSoonScreen(docType: "Activity Log"),
-                          ),
-                        );
-                      },
-                    ),
-                    const SizedBox(width: 12),
-                    Builder(
-                      builder: (context) => GestureDetector(
-                        onTap: () => Scaffold.of(context).openEndDrawer(),
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey.shade300),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: const Icon(Icons.menu, color: Colors.black, size: 24),
-                        ),
-                      ),
+                      maxLines: 1,  // ensures no wrapping
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),

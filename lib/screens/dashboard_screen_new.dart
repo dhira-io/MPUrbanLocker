@@ -1333,11 +1333,15 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
             ),
 
             // --- 2. Main White AppBar Header ---
-            Container(
-              height: 60,
-              color: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
+        Container(
+          height: 60,
+          color: Colors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              // Main Row for left & right sides
+              Row(
                 children: [
                   SizedBox(width: 24, height: 40, child: Image.asset(lionImage)),
                   const SizedBox(width: 8),
@@ -1346,19 +1350,10 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
                     height: 40,
                     child: Image.asset(logoImage, color: ColorUtils.fromHex("#613AF5")),
                   ),
-                  const SizedBox(width: 10),
-                  Flexible(
-                    child: Text(
-                      'MP Urban Locker',
-                      style: GoogleFonts.inter(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: ColorUtils.fromHex("#613AF5"),
-                      ),
-                    ),
-                  ),
 
-                  // QR Icon
+                  Spacer(),
+
+                  // Right side icons
                   IconButton(
                     icon: Icon(
                       Icons.qr_code_scanner,
@@ -1373,10 +1368,7 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
                       );
                     },
                   ),
-
-                  const SizedBox(width: 12),
-
-                  // Menu / Drawer Icon
+                  const SizedBox(width: 8),
                   Builder(
                     builder: (context) => GestureDetector(
                       onTap: () => Scaffold.of(context).openEndDrawer(),
@@ -1392,7 +1384,21 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
                   ),
                 ],
               ),
-            ),
+
+              // Centered title
+              Text(
+                'MP Urban Locker',
+                style: GoogleFonts.inter(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: ColorUtils.fromHex("#613AF5"),
+                ),
+                maxLines: 1,  // ensures no wrapping
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+         )
           ],
         ),
       );

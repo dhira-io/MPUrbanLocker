@@ -148,7 +148,7 @@ class _CreateDocumentFormState extends State<CreateDocumentForm> {
                               SizedBox(width: 5),
                               Expanded(
                                 child: Text(
-                                  "I hereby give consent to fetch my ${widget.docType} details from concerned authority, Madhya Pradesh and store it securely in my MP Urban Locker for future use.",
+                                  "I give consent to MP Locker to share my details with the issuers for the purpose of fetching my documents. I also give consent to fetch my ${widget.docType} and store it securely as per the DPDP Act in my MP Locker for future use.",
                                   textAlign: TextAlign.justify,
                                 ),
                               ),

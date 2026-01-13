@@ -21,14 +21,14 @@ import '../utils/color_utils.dart';
 class StatisticCard extends StatelessWidget {
   final String value;
   final String label;
-  final IconData icon;
+  final Image image;
   final Color iconColor;
   final VoidCallback? onTap;
 
   const StatisticCard({
     required this.value,
     required this.label,
-    required this.icon,
+    required this.image,
     required this.iconColor,
     this.onTap,
     super.key,
@@ -40,8 +40,10 @@ class StatisticCard extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: Container(
+          // alignment: Alignment.center,
+          height: 230,
           margin: const EdgeInsets.symmetric(horizontal: 4.0),
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(8.0),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(15.0),
@@ -57,25 +59,35 @@ class StatisticCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CircleAvatar(
-                radius: 28,
-                backgroundColor: iconColor.withOpacity(0.15),
-                child: Icon(icon, size: 28, color: iconColor),
+              Padding(
+                padding:  EdgeInsets.only(bottom: 8),
+                child: Container(
+                  alignment: Alignment.bottomLeft,
+                  child: CircleAvatar(
+                    radius: 28,
+                    backgroundColor: iconColor.withOpacity(0.15),
+                    child: image,
+                  ),
+                ),
               ),
 
-              const SizedBox(height: 8),
               Text(
                 value,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.inter(
-                  fontSize: 20,
+                  fontSize: 18,
                   fontWeight: FontWeight.w700,
                   color: ColorUtils.fromHex("#1F2937"),
                 ),
               ),
               const SizedBox(height: 4),
-              Text(
-                label,
-                style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w400, color: ColorUtils.fromHex("#4B5563")),
+              Expanded(
+                child: Text(
+                  label,maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w400, color: ColorUtils.fromHex("#4B5563")),
+                ),
               ),
             ],
           ),
@@ -144,18 +156,16 @@ class CategoryCard extends StatelessWidget {
             ),
             Expanded(
               flex: 3,
-              child: Container(
-                child: Text(
-                  title,
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: ColorUtils.fromHex("#4B5563"),
-                  ),
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
+              child: Text(
+                title,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: ColorUtils.fromHex("#4B5563"),
                 ),
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
 
@@ -652,28 +662,28 @@ class _DashboardScreen_oldState extends State<DashboardScreen_old> {
       child: Row(
         children: [
           StatisticCard(
-            value: '5.2M+',
-            label: 'Documents Issued',
-            icon: Icons.description,
-            iconColor: Colors.blueAccent,
+            value: '2.7 Lakhs+',
+            label: 'Trade Licenses',
+            image: Image.asset('assets/services/trade_license_certificate.png'),
+            iconColor: Color(0xFF613AF5),
             onTap: _isNavigating
                 ? null
                 : () => _navigateToDigiLockerAuth(context, "Documents Issued"),
           ),
           StatisticCard(
-            value: '120+',
-            label: 'Departments Live',
-            icon: Icons.apartment,
-            iconColor: Colors.green,
+            value: '1.9 Lakhs+',
+            label: 'Marriage Certificate',
+            image: Image.asset('assets/services/marriage_certificate.png'),
+            iconColor: Color(0xff613AF5),
             onTap: _isNavigating
                 ? null
                 : () => _navigateToDigiLockerAuth(context, "Departments Live"),
           ),
           StatisticCard(
-            value: '1K+',
-            label: 'Verified Citizens',
-            icon: Icons.person,
-            iconColor: Colors.purple,
+            value: '10.2 Lakhs+',
+            label: 'Property Tax Receipts',
+            image: Image.asset('assets/services/property_tax_receipt.png'),
+            iconColor: Color(0xffE66B00),
             onTap: _isNavigating
                 ? null
                 : () => _navigateToDigiLockerAuth(context, "Verified Citizens"),
