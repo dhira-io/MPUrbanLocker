@@ -1232,58 +1232,6 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
   }
 
   // --- APP BAR ---
-/*
-    return AppBar(
-      automaticallyImplyLeading: false,
-      title: Row(
-        children: [
-          // Placeholder for the Government/MP Logo
-          SizedBox(width: 23.64, height: 40, child: Image.asset(lionImage)),
-          const SizedBox(width: 10),
-          SizedBox(
-            width: 33,
-            height: 40,
-            child: Image.asset(logoImage, color: ColorUtils.fromHex("#613AF5")),
-          ),
-          const SizedBox(width: 10),
-          Flexible(
-            child: Text(
-              'MP Urban Locker',
-              style: GoogleFonts.inter(
-                color: ColorUtils.fromHex("#613AF5"),
-                fontWeight: FontWeight.w700,
-                fontSize: 18,
-              ),
-            ),
-          ),
-        ],
-      ),
-      actions: [
-        IconButton(
-          icon: Icon(
-            Icons.qr_code_scanner,
-            color: ColorUtils.fromHex("#212121"),
-          ),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => ComingSoonScreen(docType: "Activity Log"),
-              ),
-            );
-          },
-        ),
-        Builder(
-          builder: (context) => IconButton(
-            icon: Icon(Icons.menu, color: ColorUtils.fromHex("#212121")),
-            onPressed: () {
-              Scaffold.of(context).openEndDrawer();
-            },
-          ),
-        ),
-      ],
-    );
-*/
   PreferredSizeWidget _buildAppBar() {
       return PreferredSize(
         preferredSize: const Size.fromHeight(100), // 40 + 60
@@ -1363,7 +1311,7 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => ComingSoonScreen(docType: "Activity Log"),
+                          builder: (_) => ComingSoonScreen(docType: "QR Code Scanner"),
                         ),
                       );
                     },
@@ -1386,15 +1334,18 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
               ),
 
               // Centered title
-              Text(
-                'MP Urban Locker',
-                style: GoogleFonts.inter(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: ColorUtils.fromHex("#613AF5"),
+              Padding(
+                padding: const EdgeInsets.only(left: 4.0, right: 4.0),
+                child: Text(
+                  'MP Urban Locker',
+                  style: GoogleFonts.inter(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: ColorUtils.fromHex("#613AF5"),
+                  ),
+                  maxLines: 1,  // ensures no wrapping
+                  overflow: TextOverflow.ellipsis,
                 ),
-                maxLines: 1,  // ensures no wrapping
-                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),

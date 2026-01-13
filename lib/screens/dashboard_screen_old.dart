@@ -21,7 +21,7 @@ import '../utils/color_utils.dart';
 class StatisticCard extends StatelessWidget {
   final String value;
   final String label;
-  final Image image;
+  final Widget image;
   final Color iconColor;
   final VoidCallback? onTap;
 
@@ -39,11 +39,10 @@ class StatisticCard extends StatelessWidget {
     return Expanded(
       child: InkWell(
         onTap: onTap,
+        borderRadius: BorderRadius.circular(15.0),
         child: Container(
-          // alignment: Alignment.center,
-          height: 230,
           margin: const EdgeInsets.symmetric(horizontal: 4.0),
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(12.0),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(15.0),
@@ -59,34 +58,29 @@ class StatisticCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
-                padding:  EdgeInsets.only(bottom: 8),
-                child: Container(
-                  alignment: Alignment.bottomLeft,
-                  child: CircleAvatar(
-                    radius: 28,
-                    backgroundColor: iconColor.withOpacity(0.15),
-                    child: image,
-                  ),
-                ),
+              CircleAvatar(
+                radius: 24,
+                backgroundColor: iconColor.withOpacity(0.15),
+                child: image,
               ),
-
+              const SizedBox(height: 12),
               Text(
                 value,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.inter(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
-                  color: ColorUtils.fromHex("#1F2937"),
+                  color: const Color(0xFF1F2937),
                 ),
               ),
               const SizedBox(height: 4),
-              Expanded(
-                child: Text(
-                  label,maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w400, color: ColorUtils.fromHex("#4B5563")),
+              Text(
+                label,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                  color: const Color(0xFF4B5563),
                 ),
               ),
             ],
@@ -279,20 +273,10 @@ class _DashboardScreen_oldState extends State<DashboardScreen_old> {
 
         _buildSectionHeader(title: 'Documents you might need'),
         _buildDocumentsList(context),
-        const SizedBox(height: 20),
 
         //  _buildSectionHeader(title: 'State-wide statistics'),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Flexible(child: Text("State-wide statistics", style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600))),
-
-            ],
-          ),
-        ),
-        _buildStatisticsRow(context),
+        Flexible(child: Text("State-wide statistics", style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600))),
+        _buildStatisticsRow(context, _isNavigating),
         const SizedBox(height: 20),
 
         _buildSectionHeader(title: 'Departments'),
@@ -656,6 +640,50 @@ class _DashboardScreen_oldState extends State<DashboardScreen_old> {
     );
   }
 
+  Widget _buildStatisticsRow(BuildContext context, bool _isNavigating) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+      // IntrinsicHeight calculates the height of the tallest child
+      // and forces all other children to be able to match it.
+      child: IntrinsicHeight(
+        child: Row(
+          // Stretch forces the Expanded children to fill the full
+          // height calculated by IntrinsicHeight.
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            StatisticCard(
+              value: '2.7 Lakhs+',
+              label: 'Trade Licenses',
+              image: Image.asset('assets/services/trade_license_certificate.png'),
+              iconColor: const Color(0xFF613AF5),
+              onTap: _isNavigating
+                  ? null
+                  : () => _navigateToDigiLockerAuth(context, "Trade Licenses"),
+            ),
+            StatisticCard(
+              value: '1.9 Lakhs+',
+              label: 'Marriage Certificate',
+              image: Image.asset('assets/services/marriage_certificate.png'),
+              iconColor: const Color(0xff613AF5),
+              onTap: _isNavigating
+                  ? null
+                  : () => _navigateToDigiLockerAuth(context, "Marriage Certificate"),
+            ),
+            StatisticCard(
+              value: '10.2 Lakhs+',
+              label: 'Property Tax Receipts',
+              image: Image.asset('assets/services/property_tax_receipt.png'),
+              iconColor: const Color(0xffE66B00),
+              onTap: _isNavigating
+                  ? null
+                  : () => _navigateToDigiLockerAuth(context, "Property Tax Receipts"),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+/*
   Widget _buildStatisticsRow(context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12.0),
@@ -692,6 +720,7 @@ class _DashboardScreen_oldState extends State<DashboardScreen_old> {
       ),
     );
   }
+*/
 
   Widget _buildDepartmentsGrid() {
     return Padding(

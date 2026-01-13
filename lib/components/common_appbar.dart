@@ -126,7 +126,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => ComingSoonScreen(docType: "Activity Log"),
+                                builder: (_) => ComingSoonScreen(docType: "QR Code Scanner"),
                               ),
                             );
                           },
@@ -149,15 +149,18 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                     ),
 
                     // Centered title
-                    Text(
-                      'MP Urban Locker',
-                      style: GoogleFonts.inter(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: ColorUtils.fromHex("#613AF5"),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 4.0, right: 4.0),
+                      child: Text(
+                        'MP Urban Locker',
+                        style: GoogleFonts.inter(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: ColorUtils.fromHex("#613AF5"),
+                        ),
+                        maxLines: 1,  // ensures no wrapping
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 1,  // ensures no wrapping
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
