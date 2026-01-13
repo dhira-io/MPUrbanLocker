@@ -753,17 +753,17 @@ class _ShareScreenState extends State<ShareScreen> {
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            flex: 2,
-            child: Text(
-              label,
-              style: GoogleFonts.inter(fontSize: 14, color: Colors.grey.shade600),
-            ),
+          Text(
+            label,
+            style: GoogleFonts.inter(fontSize: 14, color: Colors.grey.shade600),
           ),
-          Expanded(
-            flex: 3,
+          const SizedBox(width: 12),
+          Flexible(
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (icon != null) ...[
                   Icon(icon, size: 16, color: Colors.grey.shade600),
@@ -772,6 +772,9 @@ class _ShareScreenState extends State<ShareScreen> {
                 Flexible(
                   child: Text(
                     value,
+                    textAlign: TextAlign.right,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -1053,16 +1056,16 @@ class _ShareScreenState extends State<ShareScreen> {
           );
           print("result ${result.status}");
           // This executes AFTER share sheet is closed
-          if (result.status == ShareResultStatus.success) {
+          if (result.status == ShareResultStatus.success ||
+              result.status == ShareResultStatus.dismissed) {
 
             if (context.mounted) {
-              // Navigator.push(
-              //   context,
-              //   MaterialPageRoute(
-              //     builder: (_) =>  SharedDocListScreen(),
-              //   ),
-              // );
-              Navigator.of(context).pop();
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>  SharedDocListScreen(),
+                ),
+              );
             }
           }
         }
