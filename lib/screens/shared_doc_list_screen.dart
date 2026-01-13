@@ -189,13 +189,27 @@ class _SharedDocumentListsView extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            label,
-            style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+          Expanded(
+            flex: 2,
+            child: Text(
+              label,
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+            ),
           ),
-          Text(
-            value,
-            style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
+          Expanded(
+            flex: 3,
+            child: Container(
+              alignment: Alignment.centerRight,
+              child: Flexible(
+                child: Text(
+                  value,
+                  style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
+                  softWrap: true,
+                  textAlign: TextAlign.right,
+
+                ),
+              ),
+            ),
           ),
         ],
       ),

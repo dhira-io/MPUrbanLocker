@@ -84,9 +84,11 @@ class _EditShareDetailsScreenState extends State<EditShareDetailsScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        Text(
-          widget.document.documentName,
-          style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w600),
+        Flexible(
+          child: Text(
+            widget.document.documentName,
+            style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w600),
+          ),
         ),
       ],
     );
@@ -229,11 +231,14 @@ class _EditShareDetailsScreenState extends State<EditShareDetailsScreen> {
             flex: 3,
             child: InkWell(
               onTap: () async {
+                final DateTime lastDate = _expiresOn.add(
+                  const Duration(days: 7),
+                );
                 final pickedDate = await showDatePicker(
                   context: context,
                   initialDate: value,
                   firstDate: DateTime.now(),
-                  lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
+                  lastDate: lastDate, //DateTime.now().add(const Duration(days: 365 * 5)),
                 );
                 if (pickedDate != null) onDateChanged(pickedDate);
               },
@@ -249,9 +254,11 @@ class _EditShareDetailsScreenState extends State<EditShareDetailsScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      DateFormat('d MMM yyyy, hh:mm a').format(value),
-                      style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+                    Expanded(
+                      child: Text(
+                        DateFormat('d MMM yyyy, hh:mm a').format(value),
+                        style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+                      ),
                     ),
                     const Icon(Icons.arrow_drop_down, color: Colors.grey),
                   ],
@@ -400,16 +407,9 @@ class _EditShareDetailsScreenState extends State<EditShareDetailsScreen> {
             );
           }
           // This executes AFTER share sheet is closed
-          if (result.status == ShareResultStatus.success ||
-              result.status == ShareResultStatus.dismissed) {
+          if (result.status == ShareResultStatus.success) {
             if (context.mounted) {
               Navigator.of(context).pop();
-              // Navigator.push(
-              //   context,
-              //   MaterialPageRoute(
-              //     builder: (_) =>  SharedDocListScreen(),
-              //   ),
-              // );
             }
           }
           print("result ${result.status}");
