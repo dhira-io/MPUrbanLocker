@@ -57,6 +57,7 @@ class ApiService {
       final authToken =  await pref.getString(AppConstants.tokenKey);
       if (authToken != null) {
         headers['Authorization'] = 'Bearer $authToken';
+        print("token- $authToken");
       }
     }
 
@@ -328,6 +329,29 @@ print(body);
 
       final response = await _client
           .get(uri, headers: await _getHeaders(includeAuth: includeAuth))
+          .timeout(const Duration(seconds: 30));
+
+      return await _handleResponse(response);
+    } on NoInternetException {
+      rethrow;
+    } on Exception catch (e) {
+      throw ApiException(e.toString());
+    }
+  }
+  Future<Map<String, dynamic>> deleteRequest(
+      String endpoint, {
+        bool includeAuth = true,
+        Map<String, String>? queryParams,
+      }) async {
+    try {
+      await _checkInternet();
+      print('$baseUrl$endpoint');
+      final uri = Uri.parse(
+        '$baseUrl$endpoint',
+      ).replace(queryParameters: queryParams);
+
+      final response = await _client
+          .delete(uri, headers: await _getHeaders(includeAuth: includeAuth))
           .timeout(const Duration(seconds: 30));
 
       return await _handleResponse(response);

@@ -3,6 +3,7 @@ import 'package:digilocker_flutter/models/doc_service_config.dart';
 import 'package:digilocker_flutter/screens/myDocuments_screen.dart';
 import 'package:digilocker_flutter/screens/profile_screen.dart';
 import 'package:digilocker_flutter/screens/comingsoon_screen.dart';
+import 'package:digilocker_flutter/screens/shared_doc_list_screen.dart';
 import 'package:digilocker_flutter/utils/color_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -1081,6 +1082,22 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
                   context,
                   MaterialPageRoute(
                     builder: (_) => ComingSoonScreen(docType: "Activity Log"),
+                  ),
+                );
+              },
+            ),
+            Divider(color: Color(0xffDDDDDD)),
+
+            ListTile(
+              leading: Image.asset('assets/share.png'),
+              title: const Text('Shared Documents'),
+              trailing: Icon(Icons.arrow_forward_ios),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        SharedDocListScreen(),
                   ),
                 );
               },

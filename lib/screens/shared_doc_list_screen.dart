@@ -14,7 +14,7 @@ class SharedDocListScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) =>
-      SharedDocListProvider()..apicall_GetAllShareDocList(context),
+          SharedDocListProvider()..apicall_GetAllShareDocList(context),
       child: const _SharedDocumentListsView(),
     );
   }
@@ -27,7 +27,7 @@ class _SharedDocumentListsView extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = context.watch<SharedDocListProvider>();
 
-    return  Scaffold(
+    return Scaffold(
       backgroundColor: ColorUtils.fromHex("#F9FAFB"),
       appBar: CustomAppBar(),
       endDrawer: customEndDrawer(context),
@@ -51,6 +51,7 @@ class _SharedDocumentListsView extends StatelessWidget {
       ),
     );
   }
+
   Widget _header(BuildContext context) {
     return Row(
       children: [
@@ -86,10 +87,10 @@ class _SharedDocumentListsView extends StatelessWidget {
   }
 
   Widget _documentItem(
-      BuildContext context,
-      SharedDocListProvider provider,
-      int index,
-      ) {
+    BuildContext context,
+    SharedDocListProvider provider,
+    int index,
+  ) {
     final SharedDocModel doc = provider.documents[index];
     final isExpanded = provider.isExpanded(index);
 
@@ -102,28 +103,33 @@ class _SharedDocumentListsView extends StatelessWidget {
           ListTile(
             leading: CircleAvatar(
               backgroundColor: const Color(0xFFEDE7FF),
-              child: Image.asset('assets/services/trade_license_certificate.png'),
+              child: Image.asset(
+                'assets/services/trade_license_certificate.png',
+              ),
             ),
             title: Text(doc.documentName),
             subtitle: Text("Shared with ${doc.sharedWithName}"),
             trailing: Icon(
-              isExpanded
-                  ? Icons.keyboard_arrow_up
-                  : Icons.keyboard_arrow_down,
+              isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
             ),
             onTap: () => provider.toggleExpanded(index),
           ),
-          if (isExpanded) _expandedContent(doc,context),
+          if (isExpanded) _expandedContent(doc, context, provider),
         ],
       ),
     );
   }
+
   String formatDate(DateTime isoDate) {
-    final localDate = isoDate.toLocal();     // IST
+    final localDate = isoDate.toLocal(); // IST
     return DateFormat("dd MMM yyyy . hh:mm a").format(localDate);
   }
 
-  Widget _expandedContent(SharedDocModel  doc,BuildContext context) {
+  Widget _expandedContent(
+    SharedDocModel doc,
+    BuildContext context,
+    SharedDocListProvider provider,
+  ) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
       child: Column(
@@ -132,7 +138,10 @@ class _SharedDocumentListsView extends StatelessWidget {
           _summaryRowWithIcon("Method", Icons.link, doc.shareMethod),
           _summaryRowWithIcon("Protection", Icons.lock, doc.protectionType),
           _summaryRow("PIN", doc.pin ?? ''),
-          _summaryRow("Permission", doc.canDownload == true ? "View & Download" : "View"),
+          _summaryRow(
+            "Permission",
+            doc.canDownload == true ? "View & Download" : "View",
+          ),
           _summaryRow("Expires On", formatDate(doc.expiresAt)),
           const SizedBox(height: 16),
           Row(
@@ -143,9 +152,15 @@ class _SharedDocumentListsView extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>  EditShareDetailsScreen(document: doc,),
+                        builder: (context) =>
+                            EditShareDetailsScreen(document: doc),
                       ),
-                    );
+                    ).then((_) {
+                      print("refresh call");
+                      context
+                          .read<SharedDocListProvider>()
+                          .apicall_GetAllShareDocList(context);
+                    });
                   },
                   style: _outlinedStyle(Colors.deepPurple),
                   child: const Text("Edit Details"),
@@ -154,7 +169,9 @@ class _SharedDocumentListsView extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: OutlinedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    provider.apicall_DeleteSharedDoc(context, doc.id);
+                  },
                   style: _outlinedStyle(Colors.red),
                   child: const Text("Revoke Link"),
                 ),
@@ -172,34 +189,40 @@ class _SharedDocumentListsView extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label,
-              style:
-              TextStyle(color: Colors.grey.shade600, fontSize: 13)),
-          Text(value,
-              style: const TextStyle(
-                  fontWeight: FontWeight.w500, fontSize: 13)),
+          Text(
+            label,
+            style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+          ),
+          Text(
+            value,
+            style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
+          ),
         ],
       ),
     );
   }
 
-  Widget _summaryRowWithIcon(
-      String label, IconData icon, String value) {
+  Widget _summaryRowWithIcon(String label, IconData icon, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label,
-              style:
-              TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+          Text(
+            label,
+            style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+          ),
           Row(
             children: [
               Icon(icon, size: 16, color: Colors.deepPurple),
               const SizedBox(width: 6),
-              Text(value,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.w500, fontSize: 13)),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w500,
+                  fontSize: 13,
+                ),
+              ),
             ],
           ),
         ],
