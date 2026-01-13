@@ -753,25 +753,36 @@ class _ShareScreenState extends State<ShareScreen> {
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             label,
             style: GoogleFonts.inter(fontSize: 14, color: Colors.grey.shade600),
           ),
-          Row(
-            children: [
-              if (icon != null) ...[
-                Icon(icon, size: 16, color: Colors.grey.shade600),
-                const SizedBox(width: 8),
-              ],
-              Text(
-                value,
-                style: GoogleFonts.inter(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
+          const SizedBox(width: 12),
+          Flexible(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (icon != null) ...[
+                  Icon(icon, size: 16, color: Colors.grey.shade600),
+                  const SizedBox(width: 8),
+                ],
+                Flexible(
+                  child: Text(
+                    value,
+                    textAlign: TextAlign.right,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
