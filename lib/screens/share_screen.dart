@@ -127,7 +127,7 @@ class _ShareScreenState extends State<ShareScreen> {
           _buildStep(index: 0, label: 'Generate\nLink/QR'),
           _buildStep(index: 1, label: 'Set\nProtection'),
           _buildStep(index: 2, label: 'Set\nDuration'),
-          _buildStep(index: 3, label: 'Set\nPermissions'),
+         // _buildStep(index: 3, label: 'Set\nPermissions'),
         ],
       ),
     );
@@ -193,8 +193,8 @@ class _ShareScreenState extends State<ShareScreen> {
         return _buildProtectionStep();
       case 2:
         return _buildDurationStep();
-      case 3:
-        return _buildPermissionsStep();
+      // case 3:
+      //   return _buildPermissionsStep();
       default:
         return Container();
     }
@@ -843,9 +843,10 @@ class _ShareScreenState extends State<ShareScreen> {
   }
 
   String _getPermissionOptionString(PermissionOption? option) {
-    return option == PermissionOption.viewAndDownload
-        ? 'View & Download'
-        : 'View Only';
+    // return option == PermissionOption.viewAndDownload
+    //     ? 'View & Download'
+    //     : 'View Only';
+    return  'View & Download';
   }
 
   // ---------- COMMON WIDGETS ----------
@@ -926,8 +927,8 @@ class _ShareScreenState extends State<ShareScreen> {
     bool canContinue =
         (_currentStep == 0 && _selectedOption != null) ||
         (_currentStep == 1 && _selectedProtectionOption != null) ||
-        (_currentStep == 2 && _selectedDurationOption != null) ||
-        (_currentStep == 3 && _selectedPermissionOption != null);
+        (_currentStep == 2 && _selectedDurationOption != null) ;
+   // || (_currentStep == 3 && _selectedPermissionOption != null);
 
     return Padding(
       padding: const EdgeInsets.all(24.0),
@@ -937,7 +938,7 @@ class _ShareScreenState extends State<ShareScreen> {
           onPressed: canContinue
               ? () {
                   setState(() {
-                    if (_currentStep < 3) {
+                    if (_currentStep < 2) {
                       _currentStep++;
                     } else {
                       apicall_shareIDGenerate(context);
