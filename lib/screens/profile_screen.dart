@@ -414,17 +414,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return dob;
   }
   Future<void> _onLogout() async {
+    final shouldLogout = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Logout"),
+          content: const Text("Are you sure you want to logout?"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text("Logout"),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldLogout != true) return;
+
     final authProvider = AuthProvider();
     await authProvider.logout();
 
-    if (mounted) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => CombinedDashboard(isLoggedIn: false),
-        ),
-      );
-    }
+    if (!mounted) return;
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => CombinedDashboard(isLoggedIn: false),
+      ),
+    );
   }
+
 }
 
