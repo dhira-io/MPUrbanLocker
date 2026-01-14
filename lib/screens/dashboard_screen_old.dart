@@ -273,15 +273,16 @@ class _DashboardScreen_oldState extends State<DashboardScreen_old> {
 
         _buildSectionHeader(title: 'Documents you might need'),
         _buildDocumentsList(context),
+        const SizedBox(height: 20),
 
-        //  _buildSectionHeader(title: 'State-wide statistics'),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Text(
-            "State-wide statistics",
-            style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600),
-          ),
-        ),
+          _buildSectionHeader(title: 'State-wide statistics'),
+        // Padding(
+        //   padding: const EdgeInsets.only(left: 16,top: 16),
+        //   child: Text(
+        //     "State-wide statistics",
+        //     style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600),
+        //   ),
+        // ),
         _buildStatisticsRow(context, _isNavigating),
         const SizedBox(height: 20),
 
