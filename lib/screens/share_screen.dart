@@ -1033,56 +1033,74 @@ class _ShareScreenState extends State<ShareScreen> {
   }
 
   Future<void> apicall_put_shareWithName(BuildContext context) async {
-    String shareID = objShareRespnse?.shareId ?? "";
+    final String shareID = objShareRespnse?.shareId ?? "";
+
     reqParams["sharedWithName"] = _shareWithController.text;
+
     try {
       final apiService = context.read<ApiService>();
+
       final Map<String, dynamic> response = await apiService.putRequest(
         AppConstants.editShareDocumentEndpoint(shareID),
         includeAuth: true,
         body: reqParams,
       );
-      if (response['success'] == true && response['data'] != null) {
-        final Map<String, dynamic> responseData = response;
-       ShareResponseModel model = ShareResponseModel.fromJson(responseData["data"]);
-        if (model.qrCode != null) {
-          File objFile = await base64ToImageFile(model.qrCode ?? "");
-          var result = await SharePlus.instance.share(
-            ShareParams(files: [XFile(objFile.path)]),
-          );
-        } else {
-          var result = await SharePlus.instance.share(
-            ShareParams(text:model.shareUrl),
-          );
-          print("result ${result.status}");
-          // This executes AFTER share sheet is closed
-          if (result.status == ShareResultStatus.success ||
-              result.status == ShareResultStatus.dismissed) {
 
-            if (context.mounted) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) =>  SharedDocListScreen(),
-                ),
-              );
-            }
-          }
-        }
+      if (response['success'] != true || response['data'] == null) {
+        Fluttertoast.showToast(
+          msg: response['message'] ?? 'Something went wrong',
+        );
+        return;
+      }
+
+      final ShareResponseModel model =
+      ShareResponseModel.fromJson(response['data']);
+
+      // 🔹 SHARE LOGIC
+      if (model.qrCode != null) {
+        final File qrFile = await base64ToImageFile(model.qrCode!);
+
+        await SharePlus.instance.share(
+          ShareParams(files: [XFile(qrFile.path)]),
+        );
+
+        // 🔥 QR share has NO reliable callback → redirect immediately
+        await _redirect(context);
       } else {
-        String errorMessage = response['message'] ?? 'Something went wrong';
-        Fluttertoast.showToast(msg: errorMessage);
+        final result = await SharePlus.instance.share(
+          ShareParams(text: model.shareUrl),
+        );
+
+        debugPrint("Share result: ${result.status}");
+
+        if (result.status == ShareResultStatus.success ||
+            result.status == ShareResultStatus.dismissed) {
+          await _redirect(context);
+        }
       }
     } on NoInternetException catch (e) {
-      Fluttertoast.showToast(msg: '${e.toString()}');
+      Fluttertoast.showToast(msg: e.toString());
     } catch (e) {
-      debugPrint('Fetch Error: $e');
-      Fluttertoast.showToast(msg: '${e.toString()}');
+      debugPrint('Share flow error: $e');
+      Fluttertoast.showToast(msg: e.toString());
     } finally {
-      // _isLoading = false;
-      // notifyListeners();
+      // 🔥 ABSOLUTE FALLBACK (native callback missing)
+      // Future.delayed(const Duration(seconds: 2), () {
+      //   _redirect(context);
+      // });
     }
   }
+  Future<void> _redirect(BuildContext context) async {
+    if ( !context.mounted) return;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            SharedDocListScreen(),
+      ),
+    );
+  }
+
 
   String formatDate(DateTime isoDate) {
     final localDate = isoDate.toLocal();     // IST

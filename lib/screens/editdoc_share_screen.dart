@@ -231,15 +231,26 @@ class _EditShareDetailsScreenState extends State<EditShareDetailsScreen> {
             flex: 3,
             child: InkWell(
               onTap: () async {
-                final DateTime lastDate = _expiresOn.add(
+                final now = DateTime.now();
+                final DateTime firstDate =
+                DateTime(now.year, now.month, now.day);
+
+                final DateTime lastDate = firstDate.add(
                   const Duration(days: 7),
                 );
+
+// 🔥 FIX: ensure initialDate >= firstDate
+                final DateTime initialDate =
+                value.isBefore(firstDate) ? firstDate : value;
+
                 final pickedDate = await showDatePicker(
                   context: context,
-                  initialDate: value,
-                  firstDate: DateTime.now(),
-                  lastDate: lastDate, //DateTime.now().add(const Duration(days: 365 * 5)),
+                  initialDate: initialDate,
+                  firstDate: firstDate,
+                  lastDate: lastDate,
+                  helpText: 'Select date',
                 );
+
                 if (pickedDate != null) onDateChanged(pickedDate);
               },
               child: Container(
