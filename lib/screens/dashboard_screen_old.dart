@@ -275,7 +275,13 @@ class _DashboardScreen_oldState extends State<DashboardScreen_old> {
         _buildDocumentsList(context),
 
         //  _buildSectionHeader(title: 'State-wide statistics'),
-        Flexible(child: Text("State-wide statistics", style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600))),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Text(
+            "State-wide statistics",
+            style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600),
+          ),
+        ),
         _buildStatisticsRow(context, _isNavigating),
         const SizedBox(height: 20),
 
