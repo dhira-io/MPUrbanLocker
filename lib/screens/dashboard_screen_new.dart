@@ -1187,15 +1187,16 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
               trailing: Icon(Icons.arrow_forward_ios),
               title: const Text('Logout'),
               onTap: () async {
-                final authProvider = AuthProvider();
-                await authProvider.logout();
-
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => CombinedDashboard(isLoggedIn: false),
-                  ),
-                );
+                _onLogout();
+                // final authProvider = AuthProvider();
+                // await authProvider.logout();
+                //
+                // Navigator.pushReplacement(
+                //   context,
+                //   MaterialPageRoute(
+                //     builder: (_) => CombinedDashboard(isLoggedIn: false),
+                //   ),
+                // );
               },
             ),
             Divider(color: Color(0xffDDDDDD)),
@@ -1737,6 +1738,43 @@ class _DashboardScreen_newState extends State<DashboardScreen_new> {
       print("refresh call");
       getDocuments();
     });
+  }
+
+  Future<void> _onLogout() async {
+    final shouldLogout = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Logout"),
+          content: const Text("Are you sure you want to logout?"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text("Logout"),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldLogout != true) return;
+
+    final authProvider = AuthProvider();
+    await authProvider.logout();
+
+    if (!mounted) return;
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => CombinedDashboard(isLoggedIn: false),
+      ),
+    );
   }
 }
 
