@@ -37,7 +37,7 @@ class _SharedDocumentListsView extends StatelessWidget {
         child: Column(
           children: [
             _header(context),
-            _searchBar(),
+            _searchBar(context),
             const SizedBox(height: 16),
 
             Expanded(
@@ -97,8 +97,11 @@ class _SharedDocumentListsView extends StatelessWidget {
     );
   }
 
-  Widget _searchBar() {
+  Widget _searchBar(BuildContext context) {
     return TextField(
+      onChanged: (value) {
+        context.read<SharedDocListProvider>().searchDocuments(value);
+      },
       decoration: InputDecoration(
         hintText: "Search for Documents",
         prefixIcon: const Icon(Icons.search),
@@ -112,6 +115,7 @@ class _SharedDocumentListsView extends StatelessWidget {
       ),
     );
   }
+
 
   Widget _documentItem(
     BuildContext context,

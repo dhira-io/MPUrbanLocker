@@ -7,10 +7,11 @@ import '../utils/constants.dart';
 
 class SharedDocListProvider extends ChangeNotifier {
   final List<SharedDocModel> documents = [];
+  final List<SharedDocModel> _allDocuments = [];
   List<bool> expanded = [];
-
   bool isLoading = false;
   String errorMessage = '';
+  String searchQuery = '';
 
   Future<void> apicall_GetAllShareDocList(BuildContext context) async {
     isLoading = true;
@@ -26,18 +27,22 @@ class SharedDocListProvider extends ChangeNotifier {
 
       if (response['success'] == true && response['data'] != null) {
         final List list = response['data']['shares'];
-print("count${list.length}");
-        documents
+        _allDocuments
           ..clear()
           ..addAll(
             list
-                .where((e) =>
-                e['isRevoked'] == false)
+                .where((e) => e['isRevoked'] == false)
                 .map((e) => SharedDocModel.fromJson(e))
                 .toList(),
           );
 
+// initially show all
+        documents
+          ..clear()
+          ..addAll(_allDocuments);
+
         expanded = List.generate(documents.length, (_) => false);
+
       } else {
         errorMessage = response['message'] ?? 'Something went wrong';
         Fluttertoast.showToast(msg: errorMessage);
@@ -97,6 +102,24 @@ print("count${list.length}");
   }
 
   bool isExpanded(int index) => expanded[index];
+
+  void searchDocuments(String query) {
+    searchQuery = query.toLowerCase();
+
+    documents
+      ..clear()
+      ..addAll(
+        _allDocuments.where((doc) {
+          return doc.documentName.toLowerCase().contains(searchQuery) ||
+              doc.sharedWithName.toLowerCase().contains(searchQuery) ||
+              doc.shareMethod.toLowerCase().contains(searchQuery);
+        }),
+      );
+
+    expanded = List.generate(documents.length, (_) => false);
+    notifyListeners();
+  }
+
 }
 
 
