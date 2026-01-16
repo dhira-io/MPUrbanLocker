@@ -201,7 +201,29 @@ class _SharedDocumentListsView extends StatelessWidget {
               Expanded(
                 child: OutlinedButton(
                   onPressed: () {
-                    provider.apicall_DeleteSharedDoc(context, doc.id);
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext dialogContext) {
+                        return AlertDialog(
+                          title: const Text('Do you want to revoke this link?'),
+                          actions: <Widget>[
+                            TextButton(
+                              child: const Text('Cancel'),
+                              onPressed: () {
+                                Navigator.of(dialogContext).pop();
+                              },
+                            ),
+                            TextButton(
+                              child: const Text('Revoke Link', style: TextStyle(color: Colors.red)),
+                              onPressed: () {
+                                Navigator.of(dialogContext).pop();
+                                provider.apicall_DeleteSharedDoc(context, doc.id);
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    );
                   },
                   style: _outlinedStyle(Colors.red),
                   child: const Text("Revoke Link"),
