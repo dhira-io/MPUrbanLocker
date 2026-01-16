@@ -1,6 +1,8 @@
 import 'dart:io';
 
+import 'package:digilocker_flutter/providers/share_provider.dart';
 import 'package:digilocker_flutter/screens/share_screen.dart';
+import 'package:digilocker_flutter/utils/FileUtils.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -82,7 +84,7 @@ class EditShareDetailsProvider with ChangeNotifier {
         if (isShare) {
           var result;
           if (model.qrCode != null) {
-            File objFile = await DataToImageFile.base64ToImageFile(model.qrCode ?? "");
+            File objFile = await FileUtils.base64ToImageFile(model.qrCode ?? "");
             result = await SharePlus.instance.share(ShareParams(files: [XFile(objFile.path)]));
           } else {
             result = await SharePlus.instance.share(ShareParams(text: model.shareUrl));
