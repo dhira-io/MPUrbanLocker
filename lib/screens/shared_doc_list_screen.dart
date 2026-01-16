@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 
 import '../components/common_appbar.dart';
+import '../services/config_service.dart';
 import '../utils/color_utils.dart';
 
 class SharedDocListScreen extends StatelessWidget {
@@ -116,7 +117,6 @@ class _SharedDocumentListsView extends StatelessWidget {
     );
   }
 
-
   Widget _documentItem(
     BuildContext context,
     SharedDocListProvider provider,
@@ -124,7 +124,7 @@ class _SharedDocumentListsView extends StatelessWidget {
   ) {
     final SharedDocModel doc = provider.documents[index];
     final isExpanded = provider.isExpanded(index);
-
+    String imgService = ConfigService.getServiceImage(doc.documentType);
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -135,7 +135,7 @@ class _SharedDocumentListsView extends StatelessWidget {
             leading: CircleAvatar(
               backgroundColor: const Color(0xFFEDE7FF),
               child: Image.asset(
-                'assets/services/trade_license_certificate.png',
+                imgService, //'assets/services/trade_license_certificate.png',
               ),
             ),
             title: Text(doc.documentName),

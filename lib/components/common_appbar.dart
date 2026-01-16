@@ -3,6 +3,7 @@ import 'package:digilocker_flutter/screens/FAQScreen.dart';
 import 'package:digilocker_flutter/screens/NotificationScreen.dart';
 import 'package:digilocker_flutter/screens/PrivacyPolicyScreen.dart';
 import 'package:digilocker_flutter/screens/TermsConditionScreen.dart';
+import 'package:digilocker_flutter/screens/activity_log_screen.dart';
 import 'package:digilocker_flutter/screens/comingsoon_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -287,7 +288,7 @@ Widget customEndDrawer(BuildContext context) {
             trailing: Icon(Icons.arrow_forward_ios,size: 16,color: ColorUtils.fromHex("#9CA3AF"),),
             onTap: () =>Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => ComingSoonScreen(docType: "Activity Log")),
+              MaterialPageRoute(builder: (_) => ActivityLogScreen()),
             ),
           ),
           Divider(color: Color(0xffDDDDDD)),

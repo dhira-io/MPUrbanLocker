@@ -1,6 +1,7 @@
 [
   {
     "type": "Trade License",
+    "typeBackend" : "TRADE_LICENSE",
     "displayName": "Trade License",
     "serviceType": "custom",
     "imagePath": "assets/services/trade_license_certificate.png",
@@ -19,6 +20,7 @@
 
   {
     "type": "Fire Noc",
+    "typeBackend" : "FIRE_NOC",
     "displayName": "Fire Noc",
     "serviceType": "custom",
     "imagePath": "assets/services/fire_extinguishing.png",
@@ -39,6 +41,7 @@
 
   {
     "type": "fire safety certificate",
+    "typeBackend" : "FIRE_SAFETY_CERTIFICATE",
     "displayName": "Fire Safety Certificate",
     "serviceType": "custom",
     "imagePath": "assets/services/firesafety_certificate.png",
@@ -58,6 +61,7 @@
 
   {
     "type": "Property Certificate",
+    "typeBackend" : "PROPERTY_CERTIFICATE",
     "displayName": "Property Noc",
     "serviceType": "custom",
     "imagePath": "assets/services/property_request_certificate.png",
@@ -78,6 +82,7 @@
 
   {
     "type": "Water Certificate",
+    "typeBackend" : "WATER_CERTIFICATE",
     "displayName": "Water Certificate",
     "serviceType": "custom",
     "imagePath": "assets/services/water_new_connection.png",
@@ -98,6 +103,7 @@
 
   {
     "type": "Water Noc",
+    "typeBackend" : "WATER_NOC",
     "displayName": "Water Noc",
     "serviceType": "custom",
     "imagePath": "assets/services/water_tax_receipt.png",
@@ -116,6 +122,7 @@
 
   {
     "type": "Marriage Certificate",
+    "typeBackend" : "MARRIAGE_CERTIFICATE",
     "displayName": "Marriage Certificate",
     "serviceType": "custom",
     "imagePath": "assets/services/marriage_certificate.png",
@@ -134,6 +141,7 @@
 
   {
     "type": "New Property Application",
+    "typeBackend" : "NEW_PROPERTY_APPLICATION",
     "displayName": "New Property Application",
     "serviceType": "custom",
     "imagePath": "assets/services/property_request_certificate.png",
@@ -152,6 +160,7 @@
 
   {
     "type": "Sewerage Connection",
+    "typeBackend" : "SEWERAGE_COLLECTION",
     "displayName": "Sewerage Connection",
     "serviceType": "custom",
     "imagePath": "assets/services/sewerage_connection.png",
@@ -170,6 +179,7 @@
 
   {
     "type": "Tree Cutting/Transit Certificate",
+    "typeBackend" : "TREE_CUTTING/TRANSIT_CERTIFICATE",
     "displayName": "Tree Cutting/Transit Certificate",
     "serviceType": "custom",
     "imagePath": "assets/services/tree_cutting.png",
@@ -190,6 +200,7 @@
 
   {
     "type": "Property Tax receipt",
+    "typeBackend" : "PROPERTY_TAX_RECEIPT",
     "displayName": "Property Tax receipt",
     "serviceType": "custom",
     "imagePath": "assets/services/property_tax_receipt.png",
@@ -231,6 +242,7 @@
   },
   {
     "type": "hoarding license",
+    "typeBackend" : "HOARDING_LICENSE",
     "displayName": "Hoarding license",
     "serviceType": "custom",
     "imagePath": "assets/services/hoarding_license.png",
@@ -249,6 +261,7 @@
   },
   {
     "type": "property mutation",
+    "typeBackend" : "PROPERTY_MUTATION",
     "displayName": "Property Mutation",
     "serviceType": "custom",
     "imagePath": "assets/services/property_mutation_certificate.png",
@@ -267,6 +280,7 @@
   },
   {
     "type": "water tax receipt",
+    "typeBackend" : "WATER_TAX_RECEIPT",
     "displayName": "Water Tax Receipt",
     "serviceType": "custom",
     "imagePath": "assets/services/water_tax_receipt.png",

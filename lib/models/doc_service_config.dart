@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 class DocServiceConfig {
   final String type;
+  final String typeBackend;
   final String displayName;
   final String serviceType;
   final String imagePath;
@@ -10,6 +11,7 @@ class DocServiceConfig {
 
   DocServiceConfig({
     required this.type,
+    required this.typeBackend,
     required this.displayName,
     required this.serviceType,
     required this.imagePath,
@@ -20,6 +22,7 @@ class DocServiceConfig {
   factory DocServiceConfig.fromJson(Map<String, dynamic> json) {
     return DocServiceConfig(
       type: json['type'],
+      typeBackend: json["typeBackend"],
       displayName: json['displayName'],
       serviceType: json['serviceType'],
       imagePath: json['imagePath'],

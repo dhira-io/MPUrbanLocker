@@ -14,4 +14,10 @@ class ConfigService {
         .map((e) => DocServiceConfig.fromJson(e as Map<String, dynamic>))
         .toList();
   }
+ static String getServiceImage(String checkType){
+    String? imageString = ConfigService.docServices
+        .firstWhere((e) => e.typeBackend == checkType)
+        .imagePath;
+    return imageString;  //?? 'assets/services/trade_license_certificate.png';
+  }
 }
