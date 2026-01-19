@@ -286,6 +286,7 @@ print(body);
     } on NoInternetException {
       rethrow;
     } on Exception catch (e) {
+      print(e.toString());
       throw ApiException(e.toString());
     }
   }
@@ -335,6 +336,7 @@ print(body);
     } on NoInternetException {
       rethrow;
     } on Exception catch (e) {
+      print(e.toString());
       throw ApiException(e.toString());
     }
   }

@@ -1,8 +1,10 @@
 class AppConstants {
   // API Configuration
-  static const String baseUrl = 'https://bktc4594-3001.inc1.devtunnels.ms';// 'https://0w5c7rsr-3001.inc1.devtunnels.ms';//
-  //'https://dev.uatenagarpalika.in:5443'; //'https://mpurbanlocker.in'; // ;
-    // 'https://fqstnlh6-3001.inc1.devtunnels.ms'; // Android emulator localhost
+  //********** PROD ***************************
+  // static const String baseUrl = 'https://mplocker.enagarpalika.mp.gov.in';
+
+  //********** DEV ***************************
+  static const String baseUrl = 'https://mpldev.uatenagarpalika.in';
 
   // API Endpoints
   static const String sessionEndpoint = '/api/digilocker/session';
